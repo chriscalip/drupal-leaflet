@@ -1,0 +1,263 @@
+<?php
+/**
+ * @file
+ * Leaflet module.
+ */
+
+include 'includes/leaflet.helpers.inc';
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function leaflet_ctools_plugin_api($module, $api) {
+  return array(
+    'version' => 1,
+    'path' => drupal_get_path('module', 'leaflet') . '/includes',
+  );
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function leaflet_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'leaflet') {
+    return 'src/Leaflet/' . str_replace("\\", DIRECTORY_SEPARATOR, $plugin_type);
+  }
+  if ($owner == 'service_container') {
+    return 'src/ServiceContainer/' . $plugin_type;
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function leaflet_ctools_plugin_type() {
+  return array(
+    'Map' => array(
+      'use hooks' => FALSE,
+      'extension' => 'php',
+    ),
+    'Layer' => array(
+      'use hooks' => FALSE,
+      'extension' => 'php',
+    ),
+    'Style' => array(
+      'use hooks' => FALSE,
+      'extension' => 'php',
+    ),
+    'Source' => array(
+      'use hooks' => FALSE,
+      'extension' => 'php',
+    ),
+    'Control' => array(
+      'use hooks' => FALSE,
+      'extension' => 'php',
+    ),
+    'Interaction' => array(
+      'use hooks' => FALSE,
+      'extension' => 'php',
+    ),
+    'Component' => array(
+      'use hooks' => FALSE,
+      'extension' => 'php',
+    ),
+  );
+}
+
+/**
+ * Create an object instance for an export.
+ *
+ * @param string $object_type
+ *   The object type to look up. See leaflet_object_types() for a list of
+ *   available object types.
+ * @param array|string|object $export
+ *   The exported object.
+ *
+ * @return mixed|leaflet_error
+ *   Returns the instance of the requested object or an instance of
+ *   leaflet_error on error.
+ */
+function leaflet_object_load($object_type, $export) {
+  // @todo: This needs to be refactored properly.
+  Leaflet::init();
+  ctools_include('export');
+
+  $object = NULL;
+  $exportable = array();
+
+  if (is_object($export)) {
+    $array_object = new ArrayObject($export);
+    $exportable = $array_object->getArrayCopy();
+  }
+  if (is_string($export)) {
+    $exportable = (array) ctools_export_crud_load('leaflet_' . strtolower($object_type) . 's', $export);
+  }
+
+  if (is_array($exportable) && isset($exportable['factory_service'])) {
+    if (Leaflet::hasService($exportable['factory_service'])) {
+      $service = explode('.', $exportable['factory_service']);
+      $object = \Drupal::service($service[0] . '.' . $service[1])->createInstance($service[3]);
+    } else {
+      $exportable += array(
+        'type' => $object_type,
+        'errorMessage' => 'Service <em>@service</em> doesn\'t exists, unable to load @type @machine_name',
+      );
+      $object = \Drupal::service('leaflet.manager')->createInstance('error');
+    }
+  } else {
+    $exportable += array(
+      'type' => $object_type,
+      'machine_name' => $export,
+      'errorMessage' => 'Unable to load CTools exportable @type @machine_name.',
+    );
+    $object = \Drupal::service('leaflet.manager')->createInstance('error');
+  }
+  $object->init($exportable);
+
+  if (isset($exportable['disabled']) && ($exportable['disabled'] == 1 || $exportable['disabled'] == TRUE)) {
+    $object->disabled = 1;
+  }
+
+  return $object;
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function leaflet_libraries_info() {
+  $libraries['leaflet'] = array(
+    'name' => 'Leaflet',
+    'vendor url' => 'http://leaflet.org/',
+    'download url' => 'TODO',
+    'version arguments' => array(
+      'file' => 'leaflet-src.js',
+      'pattern' => '@L.version = \'(.*)\'@',
+      'lines' => 10,
+    ),
+    'files' => array(
+      'js' => array(
+        'leaflet.js' => array(
+          'type' => 'file',
+          'weight' => 6,
+          'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+        ),
+      ),
+      'css' => array(
+        'leaflet.css' => array(
+          'type' => 'file',
+          'weight' => 4,
+          'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+        )
+      ),
+    ),
+    'integration files' => array(
+      'leaflet' => array(
+        'js' => array(
+          'js/leaflet.js' => array(
+            'type' => 'file',
+            'weight' => 8,
+            'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+          ),
+          'js/leaflet.cacheManager.js' => array(
+            'type' => 'file',
+            'weight' => 10,
+            'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+          ),
+          'js/leaflet.pluginManager.js' => array(
+            'type' => 'file',
+            'weight' => 12,
+            'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+          ),
+          'js/leaflet.behaviors.js' => array(
+            'type' => 'file',
+            'weight' => 14,
+            'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+          ),
+        ),
+      ),
+    ),
+    'variants' => array(
+      'debug' => array(
+        'files' => array(
+          'js' => array(
+            'leaflet-src.js' => array(
+              'type' => 'file',
+              'weight' => 2,
+              'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+            ),
+          ),
+          'css' => array(
+            'leaflet.css' => array(
+              'type' => 'file',
+              'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+            )
+          ),
+        ),
+        'integration files' => array(
+          'leaflet' => array(
+            'js' => array(
+              'js/leaflet.js' => array(
+                'type' => 'file',
+                'weight' => 8,
+                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+              ),
+              'js/leaflet.cacheManager.js' => array(
+                'type' => 'file',
+                'weight' => 10,
+                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+              ),
+              'js/leaflet.pluginManager.js' => array(
+                'type' => 'file',
+                'weight' => 12,
+                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+              ),
+              'js/leaflet.behaviors.js' => array(
+                'type' => 'file',
+                'weight' => 14,
+                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+              ),
+              'js/leaflet.console.js' => array(
+                'type' => 'file',
+                'weight' => 16,
+                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+              ),
+              'js/leaflet.debug.js' => array(
+                'type' => 'file',
+                'weight' => 18,
+                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_element_info().
+ */
+function leaflet_element_info() {
+  return array(
+    'leaflet' => array(
+      '#input' => FALSE,
+      '#tree' => TRUE,
+      '#process' => array('leaflet_element_process_callback'),
+      '#theme_wrappers' => array('form_element'),
+    ),
+  );
+}
+
+/**
+ * Process callback for the leaflet form element.
+ *
+ * Renders the map and returns the markup in an renderable array.
+ */
+function leaflet_element_process_callback($element, &$form_state) {
+  $map = leaflet_object_load('Map', $element['#map']);
+  $element['map'] = $map->build();
+
+  return $element;
+}

@@ -1,14 +1,14 @@
 <?php
 /**
  * @file
- * Class openlayers_config.
+ * Class leaflet_config.
  */
 
-namespace Drupal\openlayers\Types;
+namespace Drupal\leaflet\Types;
 use Drupal\Core\Logger\LoggerChannelInterface;
 
 /**
- * Class openlayers_config.
+ * Class leaflet_config.
  *
  * Dummy class to avoid breaking the whole processing if a plugin class is
  * missing.
@@ -54,7 +54,7 @@ class Error extends Object {
       $this->options = array_replace_recursive((array) $this->options, (array) $data['options']);
     }
 
-    $this->loggerChannel->error($this->getMessage(), array('channel' => 'openlayers'));
+    $this->loggerChannel->error($this->getMessage(), array('channel' => 'leaflet'));
     drupal_set_message($this->getMessage(), 'error', FALSE);
   }
 
@@ -76,42 +76,7 @@ class Error extends Object {
   /**
    * {@inheritdoc}
    */
-  public function getSource() {
-    return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getSources() {
-    return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function getLayers() {
-    return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getControls() {
-    return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getInteractions() {
-    return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getComponents() {
     return array();
   }
 

@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * Interface openlayers_object_interface.
+ * Interface leaflet_object_interface.
  */
 
-namespace Drupal\openlayers\Types;
+namespace Drupal\leaflet\Types;
 
 /**
- * Interface openlayers_object_interface.
+ * Interface leaflet_object_interface.
  */
 interface ObjectInterface {
   /**
@@ -31,7 +31,7 @@ interface ObjectInterface {
    *
    * @todo: Shouldn't we automatically compute this based on the fully qualified
    * class name ?
-   * ex: \Drupal\openlayers\Control\MousePosition => Control
+   * ex: \Drupal\leaflet\Control\MousePosition => Control
    *
    * @return string|FALSE
    *   The object type or FALSE on failure.
@@ -145,10 +145,10 @@ interface ObjectInterface {
    *
    * @param array $build
    *   The array with the build information.
-   * @param \Drupal\openlayers\Types\ObjectInterface $context
+   * @param \Drupal\leaflet\Types\ObjectInterface $context
    *   The context of the build. Mostly the map object.
    */
-  public function preBuild(array &$build, \Drupal\openlayers\Types\ObjectInterface $context = NULL);
+  public function preBuild(array &$build, \Drupal\leaflet\Types\ObjectInterface $context = NULL);
 
   /**
    * Invoked after an objects render array is built.
@@ -157,8 +157,8 @@ interface ObjectInterface {
    *
    * @param array $build
    *   The array with the build information.
-   * @param \Drupal\openlayers\Types\ObjectInterface $context
+   * @param \Drupal\leaflet\Types\ObjectInterface $context
    *   The context of the build. Mostly the map object.
    */
-  public function postBuild(array &$build, \Drupal\openlayers\Types\ObjectInterface $context = NULL);
+  public function postBuild(array &$build, \Drupal\leaflet\Types\ObjectInterface $context = NULL);
 }

@@ -1,0 +1,9 @@
+name = "Leaflet UI"
+description = "Provides a user interface to manage Leaflet maps."
+core = "7.x"
+package = "Leaflet"
+dependencies[] = "leaflet"
+
+configure = admin/structure/leaflet
+
+registry_autoload[] = PSR-4

@@ -1,23 +1,23 @@
 <?php
 /**
  * @file
- * Class openlayers_config.
+ * Class leaflet_config.
  */
 
-namespace Drupal\openlayers;
+namespace Drupal\leaflet;
 
 /**
- * Class openlayers_config.
+ * Class leaflet_config.
  */
 class Config {
 
   static protected function defaults($key = NULL) {
     $defaults = array(
-      'openlayers.js_css.group' => 'openlayers',
-      'openlayers.js_css.weight' => 20,
-      'openlayers.edit_view_map' => 'openlayers_map_view_edit_form',
-      'openlayers.default_ui_map' => 'openlayers_map_ui_default',
-      'openlayers.debug' => TRUE
+      'leaflet.js_css.group' => 'leaflet',
+      'leaflet.js_css.weight' => 20,
+      'leaflet.edit_view_map' => 'leaflet_map_view_edit_form',
+      'leaflet.default_ui_map' => 'leaflet_map_ui_default',
+      'leaflet.debug' => TRUE
     );
     if ($key == NULL) {
       return $defaults;
@@ -27,7 +27,7 @@ class Config {
   }
 
   static public function get($parents, $default_value = NULL) {
-    $options = \Drupal::service('variable')->get('openlayers_config');
+    $options = \Drupal::service('variable')->get('leaflet_config');
 
     if (is_string($parents)) {
       $parents = explode('.', $parents);
@@ -61,7 +61,7 @@ class Config {
   }
 
   static public function set($parents, $value) {
-    $config = \Drupal::service('variable')->get('openlayers_config', array());
+    $config = \Drupal::service('variable')->get('leaflet_config', array());
 
     if (is_string($parents)) {
       $parents = explode('.', $parents);
@@ -76,12 +76,12 @@ class Config {
     }
     $ref = $value;
 
-    \Drupal::service('variable')->set('openlayers_config', $config);
+    \Drupal::service('variable')->set('leaflet_config', $config);
     return $config;
   }
 
   static public function clear($parents) {
-    $config = \Drupal::service('variable')->get('openlayers_config', array());
+    $config = \Drupal::service('variable')->get('leaflet_config', array());
     $ref = &$config;
 
     if (is_string($parents)) {
@@ -106,7 +106,7 @@ class Config {
         }
       }
     }
-    \Drupal::service('variable')->set('openlayers_config', $config);
+    \Drupal::service('variable')->set('leaflet_config', $config);
     return $config;
   }
 

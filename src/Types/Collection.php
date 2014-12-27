@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Class openlayers_object.
+ * Class leaflet_object.
  */
 
-namespace Drupal\openlayers\Types;
+namespace Drupal\leaflet\Types;
 
 /**
  * Class Collection.
@@ -14,17 +14,17 @@ class Collection {
   /**
    * @var array
    *  List of objects in this collections. The items have to be instances of
-   * \Drupal\openlayers\Types\Object.
+   * \Drupal\leaflet\Types\Object.
    */
   protected $objects = array();
 
   /**
    * Add object to this collection.
    *
-   * @param \Drupal\openlayers\Types\Object $object
+   * @param \Drupal\leaflet\Types\Object $object
    *   Object instance to add to this collection.
    */
-  public function append(\Drupal\openlayers\Types\Object $object) {
+  public function append(\Drupal\leaflet\Types\Object $object) {
     $type = strtolower(implode('', array_slice(explode('.', $object->factory_service), -3, 1)));
     $this->objects[$type][$object->machine_name] = $object;
   }
@@ -69,8 +69,8 @@ class Collection {
       }
     }
 
-    $settings = array_map_recursive('_floatval_if_numeric', $settings);
-    $settings = removeEmptyElements($settings);
+    $settings = _leaflet_array_map_recursive('_leaflet_floatval_if_numeric', $settings);
+    $settings = _leaflet_removeEmptyElements($settings);
 
     return $settings;
   }
@@ -129,7 +129,7 @@ class Collection {
   /**
    * Merges another collection into this one.
    *
-   * @param \Drupal\openlayers\Types\Collection $collection
+   * @param \Drupal\leaflet\Types\Collection $collection
    *   The collection to merge into this one.
    */
   public function merge(Collection $collection) {

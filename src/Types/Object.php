@@ -1,15 +1,15 @@
 <?php
 /**
  * @file
- * Class openlayers_object.
+ * Class leaflet_object.
  */
 
-namespace Drupal\openlayers\Types;
+namespace Drupal\leaflet\Types;
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\openlayers\Config;
+use Drupal\leaflet\Config;
 
 /**
- * Class openlayers_object.
+ * Class leaflet_object.
  */
 abstract class Object extends PluginBase implements ObjectInterface {
 
@@ -142,27 +142,27 @@ abstract class Object extends PluginBase implements ObjectInterface {
   /**
    * {@inheritdoc}
    */
-  public function preBuild(array &$build, \Drupal\openlayers\Types\ObjectInterface $context = NULL) {
+  public function preBuild(array &$build, \Drupal\leaflet\Types\ObjectInterface $context = NULL) {
     foreach ($this->getCollection()->getFlatList() as $object) {
       if ($object !== $this) {
         $object->preBuild($build, $this);
       }
     }
 
-    drupal_alter('openlayers_object_preprocess', $build, $this);
+    drupal_alter('leaflet_object_preprocess', $build, $this);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function postBuild(array &$build, \Drupal\openlayers\Types\ObjectInterface $context = NULL) {
+  public function postBuild(array &$build, \Drupal\leaflet\Types\ObjectInterface $context = NULL) {
     foreach ($this->getCollection()->getFlatList() as $object) {
       if ($object !== $this) {
         $object->postBuild($build, $context);
       }
     }
 
-    drupal_alter('openlayers_object_postprocess', $build, $this);
+    drupal_alter('leaflet_object_postprocess', $build, $this);
   }
 
   /**
@@ -266,8 +266,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
           $this->attached['js'][$file->uri] = array(
             'data' => $file->uri,
             'type' => 'file',
-            'group' => Config::get('openlayers.js_css.group'),
-            'weight' => Config::get('openlayers.js_css.weight'),
+            'group' => Config::get('leaflet.js_css.group'),
+            'weight' => Config::get('leaflet.js_css.weight'),
           );
         }
       }
@@ -276,8 +276,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
           $this->attached['css'][$file->uri] = array(
             'data' => $file->uri,
             'type' => 'file',
-            'group' => Config::get('openlayers.js_css.group'),
-            'weight' => Config::get('openlayers.js_css.weight'),
+            'group' => Config::get('leaflet.js_css.group'),
+            'weight' => Config::get('leaflet.js_css.weight'),
           );
         }
       }
@@ -287,11 +287,11 @@ abstract class Object extends PluginBase implements ObjectInterface {
   }
 
   public function getParents() {
-    $maps = ctools_export_crud_load_all('openlayers_maps');
+    $maps = ctools_export_crud_load_all('leaflet_maps');
     $parents = array();
 
     foreach($maps as $map) {
-      $map = openlayers_object_load('map', $map);
+      $map = leaflet_object_load('map', $map);
       foreach($map->getCollection()->getFlatList() as $object) {
         if ($object->machine_name == $this->machine_name) {
           $parents[$map->machine_name] = $map;
@@ -335,8 +335,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
    * {@inheritdoc}
    */
   public function getCollection() {
-    if (!($this->collection instanceof \Drupal\openlayers\Types\Collection)) {
-      $this->collection = \Drupal::service('openlayers.manager')->createInstance('collection');
+    if (!($this->collection instanceof \Drupal\leaflet\Types\Collection)) {
+      $this->collection = \Drupal::service('leaflet.manager')->createInstance('collection');
     }
     return $this->collection;
   }

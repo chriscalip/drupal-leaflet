@@ -1,0 +1,6 @@
+name = Leaflet Contextual Links
+description = Provide contextual links on a map.
+core = 7.x
+package = "leaflet"
+
+dependencies[] = contextual

@@ -1,0 +1,48 @@
+<?php
+/**
+ * @file
+ * Administrative UI for leaflet.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function leaflet_ui_menu() {
+  $items = array();
+
+  // Core Leaflet settings pages.
+  $items['admin/structure/leaflet'] = array(
+    'title' => 'Leaflet',
+    'description' => 'Manage Leaflet maps.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('leaflet_ui_admin_settings'),
+    'access arguments' => array('administer leaflet'),
+    'file' => 'includes/leaflet_ui.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/structure/leaflet/settings'] = array(
+    'title' => 'Settings',
+    'access arguments' => array('administer leaflet'),
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 10,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function leaflet_ui_ctools_plugin_directory($owner, $plugin_type) {
+  return 'src/Plugin/' . str_replace("\\", DIRECTORY_SEPARATOR, $plugin_type);
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function leaflet_ui_ctools_plugin_api($module, $api) {
+  return array(
+    'version' => 1,
+    'path' => drupal_get_path('module', 'leaflet_ui') . '/includes'
+  );
+}
