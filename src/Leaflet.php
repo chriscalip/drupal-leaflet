@@ -103,7 +103,7 @@ class Leaflet extends Drupal {
    *   The plugin definition.
    *
    * @return object
-   *   Openlayers object instance.
+   *   Leaflet object instance.
    */
   public static function getOLObject($service, $plugin) {
     return static::$container->get('leaflet.' . strtolower($service))->createInstance($plugin);
@@ -116,7 +116,7 @@ class Leaflet extends Drupal {
    *   The plugin .
    *
    * @return array
-   *   Openlayers object instance.
+   *   Leaflet object instance.
    */
   public static function getLeafletObjectsOptions($plugin) {
     $options = array('' => t('<Choose the @plugin type>', array('@plugin' => $plugin)));

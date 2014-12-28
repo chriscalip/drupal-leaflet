@@ -61,7 +61,7 @@ function drush_leaflet_plugin() {
   chdir($path);
 
   // Download the archive.
-  if ($filepath = drush_download_file(OPENLAYERS_DOWNLOAD_URI)) {
+  if ($filepath = drush_download_file(LEAFLET_DOWNLOAD_URI)) {
     $filename = basename($filepath);
     $dirname = basename($filepath, '.zip');
 

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * OpenlayersServiceProvider plugin declaration.
+ * LeafletServiceProvider plugin declaration.
  */
 
 $plugin = array(
