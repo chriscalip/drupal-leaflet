@@ -29,6 +29,7 @@ function leaflet_ui_Maps_ctools_export_ui() {
         'start' => t('Administrative settings'),
         'settings' => t('Map settings'),
         'layers' => t('Layers'),
+        'controls' => t('Controls'),
         'preview' => t('Preview'),
       ),
       'forms' => array(
@@ -40,6 +41,9 @@ function leaflet_ui_Maps_ctools_export_ui() {
         ),
         'layers' => array(
           'form id' => 'leaflet_map_form_layers',
+        ),
+        'controls' => array(
+          'form id' => 'leaflet_map_form_controls',
         ),
         'preview' => array(
           'form id' => 'leaflet_map_form_preview',
@@ -284,6 +288,63 @@ function leaflet_map_form_layers_submit($form, &$form_state) {
 
   $form_state['item']->options['layers'] = array_values($layers_enabled);
   $form_state['item']->options['sources'] = array_values($sources_enabled);
+}
+
+/**
+ * Map controls config form handler.
+ */
+function leaflet_map_form_controls($form, &$form_state) {
+  $all_controls = ctools_export_crud_load_all('leaflet_controls');
+
+  $header = array(
+    'name' => t('Name'),
+    'machine_name' => t('Machine name'),
+    'description' => t('Description'),
+    'operations' => t('Operations'),
+  );
+
+  $plugin_name = 'leaflet_controls';
+  $plugin = ctools_get_export_ui($plugin_name);
+
+  $rows = array();
+  foreach ($all_controls as $machine_name => $control) {
+    $rows[$machine_name] = array(
+      'name' => $control->name,
+      'machine_name' => $control->machine_name,
+      'description' => $control->description,
+      'operations' => l(
+        t('Edit'),
+        'admin/structure/leaflet/controls/list/' . $machine_name . '/edit',
+        array(
+          'query' => array(
+            'destination' => current_path(),
+          )
+        )
+      ),
+    );
+  }
+
+  $form['options']['#tree'] = TRUE;
+
+  if (!isset($form_state['item']->options['controls'])) {
+    $form_state['item']->options['controls'] = array();
+  }
+
+  $form['options']['controls'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $rows,
+    '#default_value' => drupal_map_assoc($form_state['item']->options['controls']),
+  );
+
+  return $form;
+}
+
+/**
+ * Map controls config form submit handler.
+ */
+function leaflet_map_form_controls_submit($form, &$form_state) {
+  $form_state['item']->options['controls'] = array_filter(array_values($form_state['values']['options']['controls']));
 }
 
 /**

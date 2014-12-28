@@ -2,7 +2,7 @@ Drupal.leaflet = (function($){
   "use strict";
   return {
     processMap: function (map_id, context) {
-      var settings = $.extend({}, {layer:[]}, Drupal.settings.leaflet.maps[map_id]);
+      var settings = $.extend({}, {layer:[], control:[]}, Drupal.settings.leaflet.maps[map_id]);
 
       $(document).trigger('leaflet.build_start', [
         {
@@ -24,6 +24,19 @@ Drupal.leaflet = (function($){
           map.addLayer(Drupal.leaflet.cacheManager.get(data.mn));
         });
         $(document).trigger('leaflet.layers_post_alter', [{layers: settings.layer, cache: Drupal.leaflet.cacheManager}]);
+
+        $(document).trigger('leaflet.controls_pre_alter', [{controls: settings.control, cache: Drupal.leaflet.cacheManager}]);
+        settings.control.map(function (data) {
+          Drupal.leaflet.cacheManager.set(data.mn, Drupal.leaflet.getObject(context, 'controls', data, map));
+          map.addControl(Drupal.leaflet.cacheManager.get(data.mn));
+        });
+        $(document).trigger('leaflet.controls_post_alter', [{controls: settings.control, cache: Drupal.leaflet.cacheManager}]);
+
+        $(document).trigger('leaflet.components_pre_alter', [{components: settings.component, cache: Drupal.leaflet.cacheManager}]);
+        settings.component.map(function (data) {
+          Drupal.leaflet.cacheManager.set(data.mn, Drupal.leaflet.getObjectFromCache(context, 'components', data, map));
+        });
+        $(document).trigger('leaflet.components_post_alter', [{components: settings.component, cache: Drupal.leaflet.cacheManager}]);
 
         $(document).trigger('leaflet.build_stop', [
           {
