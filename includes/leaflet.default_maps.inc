@@ -25,28 +25,12 @@ function leaflet_default_maps() {
         'lat' => '0',
         'lon' => '0',
       ),
-      'rotation' => '0',
       'zoom' => '2',
     ),
     'contextualLinks' => 0,
     'provideBlock' => 0,
     'layers' => array(
       0 => 'leaflet_tilelayer_osm',
-    ),
-    'controls' => array(
-      0 => 'leaflet_control_rotate',
-      1 => 'leaflet_control_zoom',
-      2 => 'leaflet_control_zoomslider',
-      3 => 'leaflet_control_zoomtoextent',
-    ),
-    'interactions' => array(
-      0 => 'leaflet_interaction_dragpan',
-      1 => 'leaflet_interaction_dragrotate',
-      2 => 'leaflet_interaction_mousewheelzoom',
-    ),
-    'components' => array(
-      0 => 'leaflet_examples_component_map_edit_form_values',
-      1 => 'leaflet_examples_component_map_edit_form_setcenter',
     ),
   );
   $export['leaflet_map_view_edit_form'] = $ol_map;

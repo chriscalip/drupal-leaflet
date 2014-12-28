@@ -40,7 +40,7 @@ class Map extends \Drupal\leaflet\Types\Map {
 
     $form['options']['view'] = array(
       '#type' => 'fieldset',
-      '#title' => t('View: center and rotation'),
+      '#title' => t('View: center'),
       '#tree' => TRUE,
     );
 
@@ -52,7 +52,7 @@ class Map extends \Drupal\leaflet\Types\Map {
 
       $form['options']['view']['map'] = array(
         '#type' => 'leaflet',
-        '#description' => t('You can drag this map with your mouse, click to center and you can hold alt and shift key to rotate.'),
+        '#description' => t('You can drag this map with your mouse.'),
         '#map' => $map,
       );
     }
@@ -69,11 +69,6 @@ class Map extends \Drupal\leaflet\Types\Map {
         '#title' => 'Longitude',
         '#default_value' => $this->getOption(array('view', 'center', 'lat'), 0),
       ),
-    );
-    $form['options']['view']['rotation'] = array(
-      '#type' => 'textfield',
-      '#title' => 'Rotation',
-      '#default_value' => $this->getOption(array('view', 'rotation'), 0),
     );
     $form['options']['view']['zoom'] = array(
       '#type' => 'textfield',
