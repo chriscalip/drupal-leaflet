@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * Class leaflet_components_ui.
+ * Class Maps.
  */
 
 namespace Drupal\leaflet\UI;
 
 /**
- * Class leaflet_components_ui.
+ * Class Maps.
  */
 class Maps extends \LeafletObjectsUI {
 

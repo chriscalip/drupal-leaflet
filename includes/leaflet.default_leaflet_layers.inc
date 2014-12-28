@@ -7,7 +7,7 @@
 /**
  * Implements hook_default_layers().
  */
-function leaflet_default_layers() {
+function leaflet_default_leaflet_layers() {
   $export = array();
 
   $ol_layer = new stdClass();

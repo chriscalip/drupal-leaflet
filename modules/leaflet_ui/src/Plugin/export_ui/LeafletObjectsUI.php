@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * Class leaflet_objects_ui.
+ * Class LeafletObjectsUI.
  */
 
 /**
- * Class leaflet_objects_ui.
+ * Class LeafletObjectsUI.
  */
-class LeafletObjectsUI extends ctools_export_ui {
+abstract class LeafletObjectsUI extends ctools_export_ui {
 
   /**
    * Create the filter/sort form at the top of a list of exports.

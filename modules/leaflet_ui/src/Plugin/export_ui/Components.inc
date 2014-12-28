@@ -128,7 +128,7 @@ function leaflet_component_form_type($form, &$form_state) {
     '#title' => t('Component Type'),
     '#default_value' => isset($form_state['item']->factory_service) ? $form_state['item']->factory_service : '',
     '#description' => t('Select the type of component.'),
-    '#options' => leaflet::getLeafletObjectsOptions('Component'),
+    '#options' => Leaflet::getLeafletObjectsOptions('Component'),
     '#required' => TRUE,
   );
 

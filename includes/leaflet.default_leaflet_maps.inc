@@ -7,7 +7,7 @@
 /**
  * Implements hook_default_maps().
  */
-function leaflet_default_maps() {
+function leaflet_default_leaflet_maps() {
   $export = array();
 
   $ol_map = new stdClass();

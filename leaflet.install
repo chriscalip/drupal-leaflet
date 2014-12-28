@@ -32,11 +32,11 @@ function leaflet_schema() {
       'key name' => 'Machine name',
       'primary key' => 'machine_name',
       'identifier' => 'leaflet_map',
-      'default hook' => 'default_maps',
+      'default hook' => 'default_leaflet_maps',
       'cache defaults' => TRUE,
       'api' => array(
         'owner' => 'leaflet',
-        'api' => 'default_maps',
+        'api' => 'default_leaflet_maps',
         'minimum_version' => 1,
         'current_version' => 1,
       ),
@@ -85,11 +85,11 @@ function leaflet_schema() {
       'key name' => 'Machine name',
       'primary key' => 'machine_name',
       'identifier' => 'leaflet_layer',
-      'default hook' => 'default_layers',
+      'default hook' => 'default_leaflet_layers',
       'cache defaults' => TRUE,
       'api' => array(
         'owner' => 'leaflet',
-        'api' => 'default_layers',
+        'api' => 'default_leaflet_layers',
         'minimum_version' => 1,
         'current_version' => 1,
       ),
@@ -130,60 +130,6 @@ function leaflet_schema() {
       'machine_name' => array('machine_name'),
     ),
   );
-  // Sources table (ctools extras).
-  $schema['leaflet_sources'] = array(
-    'description' => 'Storage for user defined Leaflet sources.',
-    'export' => array(
-      'admin_title' => 'machine_name',
-      'key' => 'machine_name',
-      'key name' => 'Machine name',
-      'primary key' => 'machine_name',
-      'identifier' => 'leaflet_source',
-      'default hook' => 'default_sources',
-      'cache defaults' => TRUE,
-      'api' => array(
-        'owner' => 'leaflet',
-        'api' => 'default_sources',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-    'fields' => array(
-      'machine_name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-        'description' => 'Source system name.',
-      ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Source name.',
-      ),
-      'description' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Source description.',
-      ),
-      'factory_service' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Service class.',
-      ),
-      'options' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'description' => 'Source options serialized.',
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('machine_name'),
-    'unique keys' => array(
-      'machine_name' => array('machine_name'),
-    ),
-  );
   // Controls table.
   $schema['leaflet_controls'] = array(
     'description' => 'Storage for user defined Leaflet controls.',
@@ -193,11 +139,11 @@ function leaflet_schema() {
       'key name' => 'Machine name',
       'primary key' => 'machine_name',
       'identifier' => 'leaflet_control',
-      'default hook' => 'default_controls',
+      'default hook' => 'default_leaflet_controls',
       'cache defaults' => TRUE,
       'api' => array(
         'owner' => 'leaflet',
-        'api' => 'default_controls',
+        'api' => 'default_leaflet_controls',
         'minimum_version' => 1,
         'current_version' => 1,
       ),
@@ -239,61 +185,6 @@ function leaflet_schema() {
       'machine_name' => array('machine_name'),
     ),
   );
-  // Interactions table.
-  $schema['leaflet_interactions'] = array(
-    'description' => 'Storage for user defined Leaflet interactions.',
-    'export' => array(
-      'admin_title' => 'machine_name',
-      'key' => 'machine_name',
-      'key name' => 'Machine name',
-      'primary key' => 'machine_name',
-      'identifier' => 'leaflet_interaction',
-      'default hook' => 'default_interactions',
-      'cache defaults' => TRUE,
-      'api' => array(
-        'owner' => 'leaflet',
-        'api' => 'default_interactions',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-    'fields' => array(
-      'machine_name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Interaction system name.',
-      ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Interaction name.',
-      ),
-      'description' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Interaction description.',
-      ),
-      'factory_service' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Interaction service.',
-      ),
-      'options' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'description' => 'Interaction options serialized.',
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('machine_name'),
-    'unique keys' => array(
-      'machine_name' => array('machine_name'),
-    ),
-  );
   // Components table.
   $schema['leaflet_components'] = array(
     'description' => 'Storage for user defined Leaflet components.',
@@ -303,11 +194,11 @@ function leaflet_schema() {
       'key name' => 'Machine name',
       'primary key' => 'machine_name',
       'identifier' => 'leaflet_component',
-      'default hook' => 'default_components',
+      'default hook' => 'default_leaflet_components',
       'cache defaults' => TRUE,
       'api' => array(
         'owner' => 'leaflet',
-        'api' => 'default_components',
+        'api' => 'default_leaflet_components',
         'minimum_version' => 1,
         'current_version' => 1,
       ),
@@ -341,110 +232,6 @@ function leaflet_schema() {
         'type' => 'text',
         'not null' => FALSE,
         'description' => 'Component options serialized.',
-        'serialize' => TRUE,
-      ),
-    ),
-    'primary key' => array('machine_name'),
-    'unique keys' => array(
-      'machine_name' => array('machine_name'),
-    ),
-  );
-  // Projections table.
-  $schema['leaflet_projections'] = array(
-    'description' => 'Storage for user defined Leaflet projections.',
-    'export' => array(
-      'admin_title' => 'machine_name',
-      'key' => 'machine_name',
-      'key name' => 'Machine name',
-      'primary key' => 'machine_name',
-      'identifier' => 'leaflet_projection',
-      'default hook' => 'default_projections',
-      'cache defaults' => TRUE,
-      'api' => array(
-        'owner' => 'leaflet',
-        'api' => 'default_projections',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-    'fields' => array(
-      'machine_name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Projection system name.',
-      ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Projection name.',
-      ),
-      'description' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Projection description.',
-      ),
-      'definition' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Projection options definition.',
-      ),
-    ),
-    'primary key' => array('machine_name'),
-    'unique keys' => array(
-      'machine_name' => array('machine_name'),
-    ),
-  );
-  // Styles table.
-  $schema['leaflet_styles'] = array(
-    'description' => 'Storage for user defined Leaflet styles.',
-    'export' => array(
-      'admin_title' => 'machine_name',
-      'key' => 'machine_name',
-      'key name' => 'Machine name',
-      'primary key' => 'machine_name',
-      'identifier' => 'leaflet_style',
-      'default hook' => 'default_styles',
-      'cache defaults' => TRUE,
-      'api' => array(
-        'owner' => 'leaflet',
-        'api' => 'default_styles',
-        'minimum_version' => 1,
-        'current_version' => 1,
-      ),
-    ),
-    'fields' => array(
-      'machine_name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Style system name.',
-      ),
-      'name' => array(
-        'type' => 'varchar',
-        'length' => '255',
-        'not null' => TRUE,
-        'default' => '',
-        'description' => 'Style name.',
-      ),
-      'description' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Style description.',
-      ),
-      'factory_service' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-        'description' => 'Style service.',
-      ),
-      'options' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'description' => 'Style options serialized.',
         'serialize' => TRUE,
       ),
     ),

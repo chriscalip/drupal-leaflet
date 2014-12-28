@@ -128,7 +128,7 @@ function leaflet_control_form_type($form, &$form_state) {
     '#title' => t('Control Type'),
     '#default_value' => isset($form_state['item']->factory_service) ? $form_state['item']->factory_service : '',
     '#description' => t('Select the type of control.'),
-    '#options' => leaflet::getLeafletObjectsOptions('Control'),
+    '#options' => Leaflet::getLeafletObjectsOptions('Control'),
     '#required' => TRUE,
   );
 

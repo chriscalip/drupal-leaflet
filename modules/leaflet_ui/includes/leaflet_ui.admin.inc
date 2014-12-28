@@ -35,7 +35,7 @@ function leaflet_ui_admin_settings($form, &$form_state) {
     '#options' => $options,
     '#default_value' => $map,
     '#ajax' => array(
-      'callback' => '_ajax_reload_default_map',
+      'callback' => '_leaflet_ajax_reload_default_map',
       'method' => 'replace',
       'wrapper' => 'default_map_ajax',
       'effect' => 'fade',
@@ -73,7 +73,7 @@ function leaflet_ui_admin_settings($form, &$form_state) {
 /**
  * @TODO: Document.
  */
-function _ajax_reload_default_map($form, &$form_state) {
+function _leaflet_ajax_reload_default_map($form, &$form_state) {
   // This is for preventing 'system/ajax' as destination when using AJAX maps.
   // See: http://drupal.stackexchange.com/questions/86958/get-current-url-arguments-inside-ajax-callback
   $_SESSION['current_path'] = $form_state['input']['current_path'];
