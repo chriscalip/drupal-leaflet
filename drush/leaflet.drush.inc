@@ -7,7 +7,7 @@
 /**
  * The Leaflet library URI.
  */
-define('OPENLAYERS_DOWNLOAD_URI', 'https://github.com/leaflet/ol3/releases/download/v3.0.0/v3.0.0.zip');
+define('LEAFLET_DOWNLOAD_URI', 'http://leaflet-cdn.s3.amazonaws.com/build/leaflet-0.7.3.zip');
 
 /**
  * Implements hook_drush_command().
@@ -66,16 +66,16 @@ function drush_leaflet_plugin() {
     $dirname = basename($filepath, '.zip');
 
     // Remove any existing Leaflet library directory.
-    if (is_dir($dirname) || is_dir('leaflet3')) {
+    if (is_dir($dirname) || is_dir('leaflet')) {
       drush_delete_dir($dirname, TRUE);
-      drush_delete_dir('leaflet3', TRUE);
+      drush_delete_dir('leaflet', TRUE);
       drush_log(dt('A existing Leaflet library was deleted from @path', array('@path' => $path)), 'notice');
     }
 
     // Decompress the archive.
     drush_tarball_extract($filename);
-    drush_move_dir($dirname, 'leaflet3', TRUE);
-    $dirname = 'leaflet3';
+    drush_move_dir($dirname, 'leaflet', TRUE);
+    $dirname = 'leaflet';
   }
 
   if (is_dir($dirname)) {
