@@ -17,7 +17,7 @@ function leaflet_default_layers() {
   $ol_layer->description = 'Layer OpenStreetMap description';
   $ol_layer->factory_service = 'leaflet.layer.internal.TileLayer';
   $ol_layer->options = array(
-    'url' => 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+    'url' => '//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
   );
   $export['leaflet_tilelayer_osm'] = $ol_layer;
 
@@ -28,7 +28,7 @@ function leaflet_default_layers() {
   $ol_layer->description = 'Layer OpenStreetMap Hot description';
   $ol_layer->factory_service = 'leaflet.layer.internal.TileLayer';
   $ol_layer->options = array(
-    'url' => 'http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
+    'url' => '//{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png'
   );
   $export['leaflet_tilelayer_osm_hot'] = $ol_layer;
 
