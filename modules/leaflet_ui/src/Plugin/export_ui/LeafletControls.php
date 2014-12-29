@@ -10,7 +10,7 @@ namespace Drupal\leaflet\UI;
  * Class Controls.
  * @package Drupal\leaflet\UI
  */
-class Controls extends \LeafletObjectsUI {
+class LeafletControls extends \LeafletObjects {
 
   /**
    * {@inheritdoc}

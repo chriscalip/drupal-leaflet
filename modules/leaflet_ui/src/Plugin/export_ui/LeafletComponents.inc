@@ -7,7 +7,7 @@
 /**
  * CTools Export UI plugin definition.
  */
-function leaflet_ui_Components_ctools_export_ui() {
+function leaflet_ui_LeafletComponents_ctools_export_ui() {
   return array(
     'schema' => 'leaflet_components',
     'access' => 'administer leaflet',
@@ -19,8 +19,8 @@ function leaflet_ui_Components_ctools_export_ui() {
     ),
 
     'handler' => array(
-      'class' => '\\Drupal\\leaflet\\UI\\Components',
-      'file' => 'Components.php',
+      'class' => '\\Drupal\\leaflet\\UI\\LeafletComponents',
+      'file' => 'LeafletComponents.php',
     ),
 
     'export' => array(

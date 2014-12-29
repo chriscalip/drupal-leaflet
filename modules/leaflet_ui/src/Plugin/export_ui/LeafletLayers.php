@@ -9,7 +9,7 @@ namespace Drupal\leaflet\UI;
 /**
  * Class leaflet_layers_ui.
  */
-class Layers extends \LeafletObjectsUI {
+class LeafletLayers extends \LeafletObjects {
 
   /**
    * {@inheritdoc}

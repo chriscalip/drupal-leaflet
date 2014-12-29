@@ -7,7 +7,7 @@
 /**
  * CTools Export UI plugin definition.
  */
-function leaflet_ui_Maps_ctools_export_ui() {
+function leaflet_ui_LeafletMaps_ctools_export_ui() {
   return array(
     'schema' => 'leaflet_maps',
     'access' => 'administer leaflet',
@@ -19,8 +19,8 @@ function leaflet_ui_Maps_ctools_export_ui() {
     ),
 
     'handler' => array(
-      'class' => '\\Drupal\\leaflet\\UI\\Maps',
-      'file' => 'Maps.php',
+      'class' => '\\Drupal\\leaflet\\UI\\LeafletMaps',
+      'file' => 'LeafletMaps.php',
     ),
 
     'use wizard' => TRUE,

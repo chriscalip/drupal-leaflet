@@ -9,7 +9,7 @@ namespace Drupal\leaflet\UI;
 /**
  * Class Maps.
  */
-class Maps extends \LeafletObjectsUI {
+class LeafletMaps extends \LeafletObjects {
 
   /**
    * {@inheritdoc}

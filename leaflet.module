@@ -41,19 +41,7 @@ function leaflet_ctools_plugin_type() {
       'use hooks' => FALSE,
       'extension' => 'php',
     ),
-    'Style' => array(
-      'use hooks' => FALSE,
-      'extension' => 'php',
-    ),
-    'Source' => array(
-      'use hooks' => FALSE,
-      'extension' => 'php',
-    ),
     'Control' => array(
-      'use hooks' => FALSE,
-      'extension' => 'php',
-    ),
-    'Interaction' => array(
       'use hooks' => FALSE,
       'extension' => 'php',
     ),
