@@ -275,19 +275,7 @@ function leaflet_map_form_layers_submit($form, &$form_state) {
 
   ksort($layers_enabled);
 
-  $sources = $form_state['values']['sources'];
-
-  $sources_enabled = array();
-  foreach ($sources as $id => $data) {
-    if ($data['enable'] == 1) {
-      $sources_enabled[$data['weight']] = $id;
-    }
-  }
-
-  ksort($sources_enabled);
-
   $form_state['item']->options['layers'] = array_values($layers_enabled);
-  $form_state['item']->options['sources'] = array_values($sources_enabled);
 }
 
 /**
