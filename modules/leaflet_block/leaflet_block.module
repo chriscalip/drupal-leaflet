@@ -60,6 +60,7 @@ function _leaflet_block_get_block_id($map_machine_name) {
  *   The name of the map.
  */
 function _leaflet_block_get_map_name($delta) {
+  ctools_include('export');
   $all_maps = ctools_export_crud_load_all('leaflet_maps');
 
   foreach ($all_maps as $map) {
