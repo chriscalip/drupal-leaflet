@@ -1,0 +1,107 @@
+<?php
+/**
+ * @file
+ * Leaflet Services module.
+ */
+include 'leaflet_services.helpers.inc';
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function leaflet_services_ctools_plugin_api($owner, $api) {
+  if ($owner == 'services' && $api == 'services') {
+    return array('version' => 3);
+  }
+}
+
+/**
+ * Implements hook_services_resources().
+ */
+function leaflet_services_services_resources() {
+  return array(
+    'leaflet_map' => array(
+      'retrieve' => array(
+        'help' => 'Retrieves a Leaflet map',
+        'file' => array(
+          'type' => 'inc',
+          'module' => 'leaflet_services',
+          'name' => 'leaflet_services.services',
+        ),
+        'callback' => '_leaflet_services_retrieve',
+        'access callback' => '_leaflet_services_access',
+        'access arguments' => array('view'),
+        'access arguments append' => TRUE,
+        'args' => array(
+          array(
+            'name' => 'name',
+            'type' => 'string',
+            'description' => 'The name of the map to get',
+            'source' => array('path' => '0'),
+            'optional' => FALSE,
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function leaflet_services_theme($existing, $type, $theme, $path) {
+  return array(
+    'leaflet_map_iframe' => array(
+      'arguments' => array(
+        'page' => '',
+        'scripts' => '',
+        'styles' => '',
+      ),
+      'template' => 'leaflet-map--iframe',
+      'path' => drupal_get_path('module', 'leaflet_services') . '/themes',
+    ),
+  );
+}
+
+function leaflet_services_form_leaflet_map_form_settings_alter(&$form, &$form_state) {
+  $map = leaflet_object_load('map', $form_state['item']);
+
+  $form['options']['ui']['provideIframe'] = array(
+    '#type' => 'checkbox',
+    '#title' => 'Provide iframe of this map ?',
+    '#description' => t('Enable this to provide this map as an iframe through the service module.'),
+    '#default_value' => $map->getOption('provideIframe', FALSE),
+    '#parents' => array('options', 'provideIframe'),
+  );
+}
+
+function leaflet_services_form_leaflet_map_form_preview_alter(&$form, &$form_state) {
+  $map = leaflet_object_load('map', $form_state['item']);
+
+  if ((bool) $map->getOption('provideIframe', FALSE) == FALSE) {
+    return;
+  }
+
+  $form['leaflet_services'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => FALSE,
+    '#collapsed' => FALSE,
+    '#title' => 'Embed this map in an iframe',
+  );
+
+  foreach (services_endpoint_load_all() as $service) {
+    if (isset($service->resources['leaflet']['operations']['retrieve']['enabled']) && $service->resources['leaflet']['operations']['retrieve']['enabled'] == 1) {
+
+      $width = ($map->getOption('width', 'auto') == 'auto') ? '100%' : $map->getOption('width', 'auto');
+      $height = $map->getOption('height', 'auto');
+      $iframe = "<iframe src='" . url('map/leaflet/' . $map->machine_name, array('absolute' => TRUE)) . "' width='" . $width . "' height='" . $height . "'/>";
+
+      $form['leaflet_services'][$map->machine_name] = array(
+        '#type' => 'textarea',
+        '#description' => t('Copy paste this html code to embed this map in your content.'),
+        '#rows' => 3,
+        '#value' => $iframe,
+        '#disabled' => TRUE,
+      );
+    }
+  }
+}

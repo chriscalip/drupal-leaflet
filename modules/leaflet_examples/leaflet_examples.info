@@ -1,0 +1,8 @@
+name = Leaflet Examples
+description = Leaflet Examples
+core = 7.x
+package = "Leaflet"
+
+dependencies[] = leaflet
+
+registry_autoload[] = PSR-4

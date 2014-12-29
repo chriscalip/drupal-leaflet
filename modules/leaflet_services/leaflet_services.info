@@ -1,0 +1,8 @@
+name = Leaflet Services
+description = Allows you to embed any Leaflet map into an iframe.
+core = 7.x
+package = "Leaflet"
+
+dependencies[] = services
+dependencies[] = services_rrf
+dependencies[] = rest_server

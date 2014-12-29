@@ -2,7 +2,7 @@ Drupal.leaflet = (function($){
   "use strict";
   return {
     processMap: function (map_id, context) {
-      var settings = $.extend({}, {layer:[], control:[]}, Drupal.settings.leaflet.maps[map_id]);
+      var settings = $.extend({}, {layer:[], control:[], component:[]}, Drupal.settings.leaflet.maps[map_id]);
 
       $(document).trigger('leaflet.build_start', [
         {
