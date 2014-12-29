@@ -71,7 +71,7 @@ function leaflet_ui_LeafletComponents_ctools_export_ui() {
  * Component base config form handler.
  */
 function leaflet_component_form_start($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\Components();
+  $class = new Drupal\leaflet\UI\LeafletComponents();
   $class->init($form_state['plugin']);
   $class->edit_form($form, $form_state);
 
@@ -99,7 +99,7 @@ function leaflet_component_form_start($form, &$form_state) {
  * Component base config form validation handler.
  */
 function leaflet_component_form_start_validate($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\Components();
+  $class = new Drupal\leaflet\UI\LeafletComponents();
   $class->init($form_state['plugin']);
   $class->edit_form_validate($form, $form_state);
 }
@@ -108,7 +108,7 @@ function leaflet_component_form_start_validate($form, &$form_state) {
  * Component base config form submit handler.
  */
 function leaflet_component_form_start_submit($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\Components();
+  $class = new Drupal\leaflet\UI\LeafletComponents();
   $class->init($form_state['plugin']);
   $class->edit_form_submit($form, $form_state);
 

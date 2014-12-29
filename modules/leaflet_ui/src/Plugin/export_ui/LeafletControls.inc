@@ -71,7 +71,7 @@ function leaflet_ui_LeafletControls_ctools_export_ui() {
  * Control base config form handler.
  */
 function leaflet_control_form_start($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\Controls();
+  $class = new Drupal\leaflet\UI\LeafletControls();
   $class->init($form_state['plugin']);
   $class->edit_form($form, $form_state);
 
@@ -99,7 +99,7 @@ function leaflet_control_form_start($form, &$form_state) {
  * Control base config form validation handler.
  */
 function leaflet_control_form_start_validate($form, &$form_state) {
-  $class = new \Drupal\leaflet\UI\Controls();
+  $class = new Drupal\leaflet\UI\LeafletControls();
   $class->init($form_state['plugin']);
   $class->edit_form_validate($form, $form_state);
 }
@@ -108,7 +108,7 @@ function leaflet_control_form_start_validate($form, &$form_state) {
  * Control base config form submit handler.
  */
 function leaflet_control_form_start_submit($form, &$form_state) {
-  $class = new \Drupal\leaflet\UI\Controls();
+  $class = new Drupal\leaflet\UI\LeafletControls();
   $class->init($form_state['plugin']);
   $class->edit_form_submit($form, $form_state);
 

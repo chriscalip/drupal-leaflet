@@ -79,7 +79,7 @@ function leaflet_ui_LeafletMaps_ctools_export_ui() {
  * Map base config form handler.
  */
 function leaflet_map_form_start($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\Maps();
+  $class = new Drupal\leaflet\UI\LeafletMaps();
   $class->init($form_state['plugin']);
   $class->edit_form($form, $form_state);
   return $form;
@@ -89,7 +89,7 @@ function leaflet_map_form_start($form, &$form_state) {
  * Map base config form validation handler.
  */
 function leaflet_map_form_start_validate($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\Maps();
+  $class = new Drupal\leaflet\UI\LeafletMaps();
   $class->init($form_state['plugin']);
   $class->edit_form_validate($form, $form_state);
 }
@@ -98,7 +98,7 @@ function leaflet_map_form_start_validate($form, &$form_state) {
  * Map base config form submit handler.
  */
 function leaflet_map_form_start_submit($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\Maps();
+  $class = new Drupal\leaflet\UI\LeafletMaps();
   $class->init($form_state['plugin']);
   $class->edit_form_submit($form, $form_state);
 }
