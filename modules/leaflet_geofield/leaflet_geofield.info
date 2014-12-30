@@ -1,0 +1,9 @@
+name = Leaflet Geofield
+description = Leaflet Geofield integration
+core = 7.x
+package = "Leaflet"
+
+dependencies[] = leaflet
+dependencies[] = geofield (>=7.x-2.3)
+
+registry_autoload[] = PSR-4
