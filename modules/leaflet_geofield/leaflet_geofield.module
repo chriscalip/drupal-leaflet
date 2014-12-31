@@ -5,6 +5,7 @@
  */
 
 // @TODO follow-up if coordination with geofield necessary.
+module_load_include('inc', 'leaflet_geofield', 'leaflet_geofield.formatters');
 // Always include the widget code of geofield. This re-uses major parts of it.
 // module_load_include('inc', 'geofield', 'geofield.widgets.leaflet');
 
@@ -44,14 +45,6 @@ function leaflet_geofield_field_widget_info() {
   );
 
   return $widgets;
-}
-
-/**
- * Implements hook_field_widget_info_alter().
- */
-function leaflet_geofield_field_widget_info_alter(&$info) {
-  // Overwrite the geofield integration provided by the geofield module.
-  unset($info['geofield_leaflet']);
 }
 
 /**

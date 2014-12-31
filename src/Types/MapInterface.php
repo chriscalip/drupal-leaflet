@@ -27,6 +27,14 @@ interface MapInterface {
   public function getLayers();
 
   /**
+   * Returns the component objects assigned to this map.
+   *
+   * @return array
+   *   List of component objects assigned to this map.
+   */
+  public function getComponents();
+
+  /**
    * Build render array of a map.
    *
    * @return array

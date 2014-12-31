@@ -31,11 +31,12 @@ abstract class Map extends Object implements MapInterface {
   public function buildCollection() {
     parent::buildCollection();
 
-    $ol_types = array(
+    $leaflet_types = array(
       'layer',
-      'control'
+      'control',
+      'component',
     );
-    foreach ($ol_types as $type) {
+    foreach ($leaflet_types as $type) {
       foreach ($this->getOption($type . 's', array()) as $object) {
         // @TODO Throw proper exception if an object isn't available?
         if ($merge_object = leaflet_object_load($type, $object)) {
@@ -71,6 +72,13 @@ abstract class Map extends Object implements MapInterface {
    */
   public function getControls($reset = FALSE) {
     return array_values($this->getCollection()->getObjects('control'));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getComponents($reset = FALSE) {
+    return array_values($this->getCollection()->getObjects('component'));
   }
 
   /**

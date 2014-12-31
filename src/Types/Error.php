@@ -83,6 +83,14 @@ class Error extends Object {
   /**
    * {@inheritdoc}
    */
+  public function getComponents() {
+    return array();
+  }
+
+
+  /**
+   * {@inheritdoc}
+   */
   public function getType() {
     return 'Error';
   }

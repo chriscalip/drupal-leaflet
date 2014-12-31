@@ -30,6 +30,7 @@ function leaflet_ui_LeafletMaps_ctools_export_ui() {
         'settings' => t('Map settings'),
         'layers' => t('Layers'),
         'controls' => t('Controls'),
+        'components' => t('Components'),
         'preview' => t('Preview'),
       ),
       'forms' => array(
@@ -44,6 +45,9 @@ function leaflet_ui_LeafletMaps_ctools_export_ui() {
         ),
         'controls' => array(
           'form id' => 'leaflet_map_form_controls',
+        ),
+        'components' => array(
+          'form id' => 'leaflet_map_form_components',
         ),
         'preview' => array(
           'form id' => 'leaflet_map_form_preview',
@@ -333,6 +337,67 @@ function leaflet_map_form_controls($form, &$form_state) {
  */
 function leaflet_map_form_controls_submit($form, &$form_state) {
   $form_state['item']->options['controls'] = array_filter(array_values($form_state['values']['options']['controls']));
+}
+
+/**
+ * Map components config form handler.
+ */
+function leaflet_map_form_components($form, &$form_state) {
+  $all_components = ctools_export_crud_load_all('leaflet_components');
+
+  $header = array(
+    'name' => t('Name'),
+    'machine_name' => t('Machine name'),
+    'description' => t('Description'),
+    'operations' => t('Operations'),
+  );
+
+  $rows = array();
+  foreach ($all_components as $machine_name => $component) {
+    $rows[$machine_name] = array(
+      'name' => $component->name,
+      'machine_name' => $component->machine_name,
+      'description' => $component->description,
+      'operations' => l(
+        t('Edit'),
+        'admin/structure/leaflet/components/list/' . $machine_name . '/edit/options',
+        array(
+          'query' => array(
+            'destination' => current_path(),
+          ),
+          'attributes' => array(
+            // Todo: Use CTools modal window ajax for this form.
+            'class' => 'ctools-use-modall',
+          ),
+        )
+      ),
+    );
+  }
+
+  $form['options']['#tree'] = TRUE;
+
+  if (!isset($form_state['item']->options['components'])) {
+    $form_state['item']->options['components'] = array();
+  }
+
+  $form['options']['components'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $rows,
+    '#default_value' => drupal_map_assoc($form_state['item']->options['components']),
+  );
+
+  return $form;
+}
+
+/**
+ * Map components config form submit handler.
+ */
+function leaflet_map_form_components_submit($form, &$form_state) {
+  if (isset($form_state['values']['options'])) {
+    $form_state['item']->options = array_merge((array) $form_state['item']->options, (array) $form_state['values']['options']);
+  }
+  $form_state['item']->options['components'] = array_filter(array_values($form_state['values']['options']['components']));
 }
 
 /**
