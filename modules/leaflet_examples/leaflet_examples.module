@@ -168,7 +168,7 @@ function leaflet_examples($form, &$form_state, $map_arg = NULL) {
 
   }
 
-
+/*
   $form['lat'] = array(
     '#type' => 'hidden',
     '#attributes' => array('id' => 'lat'),
@@ -192,6 +192,7 @@ function leaflet_examples($form, &$form_state, $map_arg = NULL) {
     '#attributes' => array('id' => 'zoom'),
     '#value' => 0,
   );
+*/
 
   // This is for preventing 'system/ajax' as destination when using AJAX maps.
   // See: http://drupal.stackexchange.com/questions/86958/get-current-url-arguments-inside-ajax-callback
