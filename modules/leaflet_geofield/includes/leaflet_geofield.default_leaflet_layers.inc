@@ -10,18 +10,30 @@
 function leaflet_geofield_default_leaflet_layers() {
   $export = array();
 
-
+  $machine_name = 'leaflet_geofield_layer_openstreetmap';
   $leaflet_layer = new stdClass();
   $leaflet_layer->disabled = FALSE; /* Edit this to true to make a default layer disabled initially */
   $leaflet_layer->api_version = 1;
-  $leaflet_layer->machine_name = 'leaflet_geofield_layer_openstreetmap';
-  $leaflet_layer->name = 'Geofield OpenStreetMap';
+  $leaflet_layer->machine_name = $machine_name;
+  $leaflet_layer->name = 'Geofield Preset OpenStreetMap';
   $leaflet_layer->description = '';
   $leaflet_layer->factory_service = 'leaflet.layer.internal.TileLayer';
   $leaflet_layer->options = array(
-    'source' => 'leaflet_geofield_source_openstreetmap',
+    'url' => '//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   );
-  $export['leaflet_geofield_layer_openstreetmap'] = $leaflet_layer;
+  $export[$machine_name] = $leaflet_layer;
 
+  $machine_name2 = 'leaflet_geofield_formatter_layer_geofield';
+  $leaflet_layer2 = new stdClass();
+  $leaflet_layer2->disabled = FALSE; /* Edit this to true to make a default layer disabled initially */
+  $leaflet_layer2->api_version = 1;
+  $leaflet_layer2->machine_name = $machine_name2;
+  $leaflet_layer2->name = 'Geofield Marker Layer';
+  $leaflet_layer2->description = "This layer is intended to display geofield data and it's entity data through token";
+  $leaflet_layer2->factory_service = 'leaflet.layer.internal.GeofieldMarkerLayer';
+  $leaflet_layer2->options = array(
+    'displaysGeofieldInfo' => 1,
+  );
+  $export[$machine_name2] = $leaflet_layer2;
   return $export;
 }

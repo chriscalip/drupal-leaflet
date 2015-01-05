@@ -30,28 +30,32 @@ function leaflet_geofield_field_formatter_settings_form($field, $instance, $view
   $element = array();
   // Map preset formatter
   if ($display['type'] == 'geofield_leaflet') {
-    // Get preset options, filtered to those which have the GeoField component.
     if (!function_exists('ctools_export_crud_load_all')) {
       ctools_include('export');
     }
     $maps = ctools_export_crud_load_all('leaflet_maps');
+    // valid map options are only maps with a layer, and that layer has a option enabled for
+    // "displayGeofieldInfo" the idea is leaflet_geofield provides a default geofield layer,
+    // and other modules can provide layers intended for geofield and site-admins are able to use
+    // those layers.
     $map_options = array();
     foreach ($maps as $machine_name => $data) {
       /** @var \Drupal\leaflet\Map\Map $map */
       $map = leaflet_object_load('Map', $machine_name);
-      foreach ($map->getComponents() as $component) {
-        if ($component instanceof \Drupal\leaflet\Component\Geofield) {
+      foreach ($map->getLayers() as $layer) {
+        // if the layer is intended to display a geofield information.
+        if ($layer->getOption('displaysGeofieldInfo') == 1) {
           $map_options[$machine_name] = $data->name;
         }
       }
     }
     if (empty($map_options)) {
-      form_set_error('leaflet_map', "Error: You have no compatible leaflet maps. Make sure that at least one map has the 'GeoField' component enabled.");
+      form_set_error('leaflet_map', "Error: You have no compatible leaflet maps. Make sure that at least one map has a 'GeoField' layer enabled, eg. a layer with an option displaysGeofieldInfo.");
     }
     $element['leaflet_map'] = array(
       '#type' => 'select',
       '#title' => t('Leaflet Map'),
-      '#default_value' => isset($settings['leaflet_map']) ? $settings['leaflet_map'] : 'leaflet_geofield_map_geofield',
+      '#default_value' => isset($settings['leaflet_map']) ? $settings['leaflet_map'] : 'leaflet_geofield_formatter_map_geofield',
       '#options' => $map_options,
       '#description' => t('Select which Leaflet map you would like to use. Only maps which have the GeoField behavior may be selected. If your preferred map is not here, add the GeoField behavior to it first. The "Draw Features" bahavior is incompatible - presets with this behavior are not shown.'),
     );
