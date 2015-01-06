@@ -33,6 +33,21 @@ function leaflet_geofield_default_leaflet_layers() {
   $leaflet_layer2->factory_service = 'leaflet.layer.internal.GeofieldMarkerLayer';
   $leaflet_layer2->options = array(
     'displaysGeofieldInfo' => 1,
+    'popupSettings' => array(
+      'show' => 1,
+      'text' => '',
+    ),
+    'markerSettings' => array(
+      'clickable' => 1,
+      'draggable' => 0,
+      'keyboard' => 1,
+      'title' => '',
+      'alt' => '',
+      'zIndexOffset' => 0,
+      'opacity' => 1,
+      'riseOnHover' => 0,
+      'riseOffset' => 250,
+    ),
   );
   $export[$machine_name2] = $leaflet_layer2;
   return $export;

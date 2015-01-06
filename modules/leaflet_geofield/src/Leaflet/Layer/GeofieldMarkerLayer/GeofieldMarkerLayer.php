@@ -42,7 +42,7 @@ class GeofieldMarkerLayer extends Layer {
       '#title' => t('Popup text'),
       '#description' => t('Enter the text for the popup. Tokens are supported.'),
       '#type' => 'textfield',
-      '#default_value' => $this->getOption(array('popupSettings', 'text')),
+      '#default_value' => $this->getOption(array('popupSettings', 'text'), ''),
     );
     $form['options']['markerSettings'] = array(
       '#type' => 'fieldset',
@@ -74,13 +74,13 @@ class GeofieldMarkerLayer extends Layer {
       '#title' => t('title'),
       '#description' => t('Text for the browser tooltip that appear on marker hover (no tooltip by default).'),
       '#type' => 'textfield',
-      '#default_value' => $this->getOption(array('markerSettings', 'title')),
+      '#default_value' => $this->getOption(array('markerSettings', 'title'), ''),
     );
     $form['options']['markerSettings']['alt'] = array(
       '#title' => t('alt'),
       '#description' => t('Text for the browser tooltip that appear on marker hover (no tooltip by default).'),
       '#type' => 'textfield',
-      '#default_value' => $this->getOption(array('markerSettings', 'alt')),
+      '#default_value' => $this->getOption(array('markerSettings', 'alt'), ''),
     );
     $form['options']['markerSettings']['zIndexOffset'] = array(
       '#title' => t('zIndexOffset'),
