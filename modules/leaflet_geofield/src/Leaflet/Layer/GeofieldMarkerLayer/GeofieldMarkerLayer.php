@@ -31,7 +31,6 @@ class GeofieldMarkerLayer extends Layer {
       '#title' => t('Popup Settings'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#description' => t('Based on settings based on http://leafletjs.com/reference.html#marker')
     );
     $form['options']['popupSettings']['show'] = array(
       '#title' => t('Popup'),
@@ -50,7 +49,7 @@ class GeofieldMarkerLayer extends Layer {
       '#title' => t('Marker Settings'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#description' => t('Based on settings based on http://leafletjs.com/reference.html#marker')
+      '#description' => t('Based on settings based on http://leafletjs.com/reference.html#marker'),
     );
     // the following options are based on http://leafletjs.com/reference.html#marker
     $form['options']['markerSettings']['clickable'] = array(
