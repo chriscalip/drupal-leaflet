@@ -47,7 +47,7 @@ class GeofieldMarkerLayer extends Layer {
     if (module_exists('token')) {
       $entities = entity_get_info();
       $visible_options = array();
-      $entity_options = array('_none' => 'None');
+      $entity_options = array();
       foreach ($entities as $key => $entity) {
         $entity_options[$key] = $entity['label'];
         $visible_options[] = array('value' => $key);
@@ -55,7 +55,7 @@ class GeofieldMarkerLayer extends Layer {
       $form['options']['popupSettings']['token_entity'] = array(
         '#title' => t('Select an Entity Type that tokens will be based.'),
         '#type' => 'select',
-        '#options' => $entity_options,
+        '#options' => array('_none' => 'None') + $entity_options,
         '#default_value' => '_none',
       );
       $form['options']['popupSettings']['token_help'] = array(
@@ -64,7 +64,7 @@ class GeofieldMarkerLayer extends Layer {
         // @TODO how change the value of array('node') to whatever is
         // selected at token_entity e.g if selected is comment
         // value of token_types is array('comment')
-        '#token_types' => array('node'),
+        '#token_types' => array_keys($entity_options),
         // token_help form item only shows if selected option of token_entity
         // is not _none
         '#states' => array(
