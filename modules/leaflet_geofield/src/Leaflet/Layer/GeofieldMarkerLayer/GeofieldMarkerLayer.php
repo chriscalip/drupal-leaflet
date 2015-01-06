@@ -44,6 +44,36 @@ class GeofieldMarkerLayer extends Layer {
       '#type' => 'textfield',
       '#default_value' => $this->getOption(array('popupSettings', 'text'), ''),
     );
+    if (module_exists('token')) {
+      $entities = entity_get_info();
+      $visible_options = array();
+      $entity_options = array('_none' => 'None');
+      foreach ($entities as $key => $entity) {
+        $entity_options[$key] = $entity['label'];
+        $visible_options[] = array('value' => $key);
+      }
+      $form['options']['popupSettings']['token_entity'] = array(
+        '#title' => t('Select an Entity Type that tokens will be based.'),
+        '#type' => 'select',
+        '#options' => $entity_options,
+        '#default_value' => '_none',
+      );
+      $form['options']['popupSettings']['token_help'] = array(
+        '#type' => 'container',
+        '#theme' => 'token_tree',
+        // @TODO how change the value of array('node') to whatever is
+        // selected at token_entity e.g if selected is comment
+        // value of token_types is array('comment')
+        '#token_types' => array('node'),
+        // token_help form item only shows if selected option of token_entity
+        // is not _none
+        '#states' => array(
+          'visible' => array(
+            ':input[name="options[popupSettings][token_entity]"]' => $visible_options
+          ),
+        ),
+      );
+    }
     $form['options']['markerSettings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Marker Settings'),
