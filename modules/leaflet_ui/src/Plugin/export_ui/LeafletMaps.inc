@@ -19,7 +19,7 @@ function leaflet_ui_LeafletMaps_ctools_export_ui() {
     ),
 
     'handler' => array(
-      'class' => '\\Drupal\\leaflet\\UI\\LeafletMaps',
+      'class' => '\\Drupal\\leaflet_ui\\UI\\LeafletMaps',
       'file' => 'LeafletMaps.php',
     ),
 
@@ -83,7 +83,7 @@ function leaflet_ui_LeafletMaps_ctools_export_ui() {
  * Map base config form handler.
  */
 function leaflet_map_form_start($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\LeafletMaps();
+  $class = new Drupal\leaflet_ui\UI\LeafletMaps();
   $class->init($form_state['plugin']);
   $class->edit_form($form, $form_state);
   return $form;
@@ -93,7 +93,7 @@ function leaflet_map_form_start($form, &$form_state) {
  * Map base config form validation handler.
  */
 function leaflet_map_form_start_validate($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\LeafletMaps();
+  $class = new Drupal\leaflet_ui\UI\LeafletMaps();
   $class->init($form_state['plugin']);
   $class->edit_form_validate($form, $form_state);
 }
@@ -102,7 +102,7 @@ function leaflet_map_form_start_validate($form, &$form_state) {
  * Map base config form submit handler.
  */
 function leaflet_map_form_start_submit($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\LeafletMaps();
+  $class = new Drupal\leaflet_ui\UI\LeafletMaps();
   $class->init($form_state['plugin']);
   $class->edit_form_submit($form, $form_state);
 }
@@ -112,11 +112,12 @@ function leaflet_map_form_start_submit($form, &$form_state) {
  */
 function leaflet_map_form_settings($form, &$form_state) {
   if (!isset($form_state['item']->factory_service)) {
-    $form_state['item']->factory_service = 'leaflet.map.internal.Map';
+    $form_state['item']->factory_service = 'leaflet.Map:OLMap';
   }
-  $map = leaflet_object_load('Map', $form_state['item']);
-  $map->optionsForm($form, $form_state);
-  $form['options']['#tree'] = TRUE;
+  if (($map = \Drupal\leaflet\Leaflet::load('Map', $form_state['item'])) == TRUE) {
+    $map->optionsForm($form, $form_state);
+    $form['options']['#tree'] = TRUE;
+  }
 
   return $form;
 }
@@ -125,15 +126,7 @@ function leaflet_map_form_settings($form, &$form_state) {
  * Map settings config form validation handler.
  */
 function leaflet_map_form_settings_validate($form, &$form_state) {
-  $item = $form_state['item'];
-  if (empty($item->factory_service)) {
-    $item->factory_service = 'leaflet.map.internal.Map';
-  }
-  if (isset($form_state['values']['options'])) {
-    $form_state['item']->options = array_merge((array) $form_state['item']->options, (array) $form_state['values']['options']);
-  }
-
-  $map = leaflet_object_load('Map', $item);
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
   $map->optionsFormValidate($form, $form_state);
 }
 
@@ -141,15 +134,12 @@ function leaflet_map_form_settings_validate($form, &$form_state) {
  * Map settings config form submit handler.
  */
 function leaflet_map_form_settings_submit($form, &$form_state) {
-  // todo: fix.
-  if (empty($form_state['item']->factory_service)) {
-    $form_state['item']->factory_service = 'leaflet.map.internal.Map';
-  }
-  if (isset($form_state['values']['options'])) {
-    $form_state['item']->options = array_merge((array) $form_state['item']->options, (array) $form_state['values']['options']);
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
+
+  if (empty($map->factory_service)) {
+    $map->factory_service = 'leaflet.Map:OLMap';
   }
 
-  $map = leaflet_object_load('Map', $form_state['item']);
   $map->optionsFormSubmit($form, $form_state);
 }
 
@@ -157,14 +147,16 @@ function leaflet_map_form_settings_submit($form, &$form_state) {
  * Map layers config form handler.
  */
 function leaflet_map_form_layers($form, &$form_state) {
-  $all_layers = ctools_export_crud_load_all('leaflet_layers');
-  $map = leaflet_object_load('Map', $form_state['item']);
+  $all_layers = \Drupal\leaflet\Leaflet::loadAllExportable('Layer');
+  if (($map = \Drupal\leaflet\Leaflet::load('Map', $form_state['item'])) == FALSE) {
+    return;
+  }
 
   $layers = array();
-  foreach ($map->getLayers() as $layer) {
-    if (isset($all_layers[$layer->machine_name])) {
+  foreach ($map->getObjects('layer') as $layer) {
+    if (is_object($layer) && isset($all_layers[$layer->machine_name])) {
       $layers[$layer->machine_name] = $all_layers[$layer->machine_name];
-      $layers[$layer->machine_name]->enable = 1;
+      $layers[$layer->machine_name]->enabled = 1;
       unset($all_layers[$layer->machine_name]);
     }
   }
@@ -174,16 +166,19 @@ function leaflet_map_form_layers($form, &$form_state) {
   $data = array();
 
   $i = 0;
+  /* @var \Drupal\leaflet\Types\Layer $layer */
   foreach ($layers as $machine_name => $layer) {
-    $data[$machine_name] = array(
-      'name' => $layer->name,
-      'machine_name' => $layer->machine_name,
-      'description' => $layer->description,
-      'factory_service' => $layer->factory_service,
-      'weight' => $i++,
-      'enable' => isset($layer->enable) ? $layer->enable : 0,
-      'default' => 1,
-    );
+    if (is_object($layer)) {
+      $data[$machine_name] = array(
+        'name' => $layer->name,
+        'machine_name' => $layer->machine_name,
+        'factory_service' => $layer->factory_service,
+        'weight' => $i++,
+        'enabled' => isset($layer->enabled) ? $layer->enabled : 0,
+        'default' => 1,
+        'style' => isset($layer->options['style']) ? $layer->options['style'] : NULL
+      );
+    }
   }
 
   $rows = array();
@@ -229,6 +224,8 @@ function leaflet_map_form_layers($form, &$form_state) {
     $row_elements[$id] = array(
       'weight' => &$rows[$id]['data'][1]['data'],
       'enabled' => &$rows[$id]['data'][2]['data'],
+      'style' => &$rows[$id]['data'][3]['data'],
+      'machine_name' => &$rows[$id]['data'][4]['data'],
     );
   }
 
@@ -249,6 +246,7 @@ function leaflet_map_form_layers($form, &$form_state) {
       // We need two empty columns for the weigth field and the cross.
       array('data' => NULL, 'colspan' => 2),
       t('Enabled'),
+      array('data' => t('Style'), 'colspan' => 1),
       t('Name'),
       t('Machine name'),
       t('Description'),
@@ -268,66 +266,148 @@ function leaflet_map_form_layers($form, &$form_state) {
  * Map layers config form submit handler.
  */
 function leaflet_map_form_layers_submit($form, &$form_state) {
-  $layers = $form_state['values']['layers'];
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
 
-  $layers_enabled = array();
-  foreach ($layers as $id => $data) {
-    if ($data['enable'] == 1) {
-      $layers_enabled[$data['weight']] = $id;
+  $layers_enabled = array_filter($form_state['values']['layers'], function($item) {
+    return (bool) $item['enabled'];
+  });
+
+  foreach ($layers_enabled as $id => $data) {
+    //Update the layer style.
+    if (($layer = \Drupal\leaflet\Leaflet::load('layer', $data['machine_name'])) == TRUE) {
+      if (!empty($data['style'])) {
+        $layer_style = $layer->getStyle();
+        if (!$layer_style || ($data['style'] != $layer_style->machine_name)) {
+          $style = \Drupal\leaflet\Leaflet::load('style', $data['style']);
+          $layer->setStyle($style);
+        }
+      }
+      else {
+        $layer->clearOption('style');
+        $layer->getCollection()->clear(array('style'));
+      }
+      \Drupal\leaflet\Leaflet::save($layer);
     }
   }
 
-  ksort($layers_enabled);
+  $map->getCollection()->clear(array('layer'));
+  foreach($layers_enabled as $layer => $data) {
+    $layer = \Drupal\leaflet\Leaflet::load('layer', $layer);
+    $layer->setWeight($data['weight']);
+    $map->getCollection()->merge($layer->getCollection());
+  }
 
-  $form_state['item']->options['layers'] = array_values($layers_enabled);
+  $form_state['item'] = $map->getExport();
 }
 
 /**
  * Map controls config form handler.
  */
 function leaflet_map_form_controls($form, &$form_state) {
-  $all_controls = ctools_export_crud_load_all('leaflet_controls');
-
-  $header = array(
-    'name' => t('Name'),
-    'machine_name' => t('Machine name'),
-    'description' => t('Description'),
-    'operations' => t('Operations'),
-  );
-
-  $plugin_name = 'leaflet_controls';
-  $plugin = ctools_get_export_ui($plugin_name);
-
-  $rows = array();
-  foreach ($all_controls as $machine_name => $control) {
-    $rows[$machine_name] = array(
-      'name' => $control->name,
-      'machine_name' => $control->machine_name,
-      'description' => $control->description,
-      'operations' => l(
-        t('Edit'),
-        'admin/structure/leaflet/controls/list/' . $machine_name . '/edit',
-        array(
-          'query' => array(
-            'destination' => current_path(),
-          )
-        )
-      ),
-    );
-  }
-
-  $form['options']['#tree'] = TRUE;
+  $all_controls = \Drupal\leaflet\Leaflet::loadAllExportable('Control');
 
   if (!isset($form_state['item']->options['controls'])) {
     $form_state['item']->options['controls'] = array();
   }
 
-  $form['options']['controls'] = array(
-    '#type' => 'tableselect',
-    '#header' => $header,
-    '#options' => $rows,
-    '#default_value' => drupal_map_assoc($form_state['item']->options['controls']),
+  $data = array();
+
+  // Ensure the controls are ordered correctly.
+  foreach (array_reverse($form_state['item']->options['controls']) as $machine_name) {
+    if (isset($all_controls[$machine_name])) {
+      $control = $all_controls[$machine_name];
+      $all_controls = array($machine_name => $control) + $all_controls;
+    }
+  }
+
+  $i = 0;
+  foreach ($all_controls as $machine_name => $control) {
+    if (is_object($control)) {
+      $data[$machine_name] = array(
+        'name' => $control->name,
+        'machine_name' => $control->machine_name,
+        'description' => $control->description,
+        'weight' => $i++,
+        'enabled' => (int) in_array($control->machine_name, $form_state['item']->options['controls']),
+        'default' => 1,
+      );
+    }
+  }
+
+  $rows = array();
+  $row_elements = array();
+  foreach ($data as $id => $entry) {
+    $rows[$id] = array(
+      'data' => array(
+        array(
+          'class',
+          array(
+            'entry-cross'
+          )
+        ),
+        array(
+          'data' => array(
+            '#type' => 'weight',
+            '#title' => t('Weight'),
+            '#title_display' => 'invisible',
+            '#default_value' => $entry['weight'],
+            '#parents' => array('controls', $id, 'weight'),
+            '#attributes' => array(
+              'class' => array('entry-order-weight'),
+            ),
+          )
+        ),
+        array(
+          'data' => array(
+            '#type' => 'checkbox',
+            '#title' => t('Enable'),
+            '#title_display' => 'invisible',
+            '#default_value' => $entry['enabled'],
+            '#parents' => array('controls', $id, 'enabled'),
+          )
+        ),
+        check_plain($entry['name']),
+        check_plain($entry['machine_name']),
+        check_plain($entry['description']),
+        l(t('Edit'), 'admin/structure/leaflet/controls/list/' . $entry['machine_name'] . '/edit',
+          array(
+            'query' => array(
+              'destination' => current_path(),
+            ),
+          )
+        ),
+      ),
+      'class' => array('draggable'),
+    );
+    // Build rows of the form elements in the table.
+    $row_elements[$id] = array(
+      'weight' => &$rows[$id]['data'][1]['data'],
+      'enabled' => &$rows[$id]['data'][2]['data'],
+    );
+  }
+
+  $form['options']['#tree'] = TRUE;
+
+  // Add the table to the form.
+  $form['controls']['table_controls'] = array(
+    '#theme' => 'table',
+    // The row form elements need to be processed and build,
+    // therefore pass them as element children.
+    'elements' => $row_elements,
+    '#header' => array(
+      // We need two empty columns for the weigth field and the cross.
+      array('data' => NULL, 'colspan' => 2),
+      t('Enabled'),
+      t('Name'),
+      t('Machine name'),
+      t('Description'),
+      t('Operations'),
+    ),
+    '#rows' => $rows,
+    '#empty' => t('There are no entries available.'),
+    '#attributes' => array('id' => 'entry-order-controls'),
   );
+  drupal_add_tabledrag('entry-order-controls', 'order', 'sibling', 'entry-order-weight');
 
   return $form;
 }
@@ -336,14 +416,153 @@ function leaflet_map_form_controls($form, &$form_state) {
  * Map controls config form submit handler.
  */
 function leaflet_map_form_controls_submit($form, &$form_state) {
-  $form_state['item']->options['controls'] = array_filter(array_values($form_state['values']['options']['controls']));
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
+
+  $controls_enabled = array_filter($form_state['values']['controls'], function($item) {
+    return (bool) $item['enabled'];
+  });
+
+  $map->getCollection()->clear(array('control'));
+  foreach($controls_enabled as $control => $data) {
+    $control = \Drupal\leaflet\Leaflet::load('control', $control);
+    $control->setWeight($data['weight']);
+    $map->getCollection()->append($control);
+  }
+
+  $form_state['item'] = $map->getExport();
 }
 
 /**
  * Map components config form handler.
  */
 function leaflet_map_form_components($form, &$form_state) {
-  $all_components = ctools_export_crud_load_all('leaflet_components');
+  $all_components = \Drupal\leaflet\Leaflet::loadAllExportable('Component');
+  $data = array();
+
+  // See if we can get rid of these kinds of stuff
+  $form_state['item']->options += array(
+    'controls' => array(),
+    'components' => array()
+  );
+
+  // Ensure the components are ordered correctly.
+  foreach (array_reverse($form_state['item']->options['components']) as $machine_name) {
+    if (isset($all_components[$machine_name])) {
+      $component = $all_components[$machine_name];
+      $all_components = array($machine_name => $component) + $all_components;
+    }
+  }
+
+  $i = 0;
+  foreach ($all_components as $machine_name => $component) {
+    if (is_object($component)) {
+      $data[$machine_name] = array(
+        'name' => $component->name,
+        'machine_name' => $component->machine_name,
+        'description' => $component->description,
+        'weight' => $i++,
+        'enabled' => (int) in_array($component->machine_name, $form_state['item']->options['components']),
+        'default' => 1,
+      );
+    }
+  }
+
+  $rows = array();
+  $row_elements = array();
+  foreach ($data as $id => $entry) {
+    $rows[$id] = array(
+      'data' => array(
+        array('class', array('entry-cross')),
+        array(
+          'data' => array(
+            '#type' => 'weight',
+            '#title' => t('Weight'),
+            '#title_display' => 'invisible',
+            '#default_value' => $entry['weight'],
+            '#parents' => array('components', $id, 'weight'),
+            '#attributes' => array(
+              'class' => array('entry-order-weight'),
+            ),
+          )),
+        array(
+          'data' => array(
+            '#type' => 'checkbox',
+            '#title' => t('Enable'),
+            '#title_display' => 'invisible',
+            '#default_value' => $entry['enabled'],
+            '#parents' => array('components', $id, 'enabled'),
+          )),
+        check_plain($entry['name']),
+        check_plain($entry['machine_name']),
+        check_plain($entry['description']),
+        l(t('Edit'), 'admin/structure/leaflet/components/list/' . $entry['machine_name'] . '/edit',
+          array(
+            'query' => array(
+              'destination' => current_path(),
+            ),
+          )
+        ),
+      ),
+      'class' => array('draggable'),
+    );
+    // Build rows of the form elements in the table.
+    $row_elements[$id] = array(
+      'weight' => &$rows[$id]['data'][1]['data'],
+      'enabled' => &$rows[$id]['data'][2]['data'],
+    );
+  }
+
+  $form['options']['#tree'] = TRUE;
+
+  // Add the table to the form.
+  $form['components']['table_components'] = array(
+    '#theme' => 'table',
+    // The row form elements need to be processed and build,
+    // therefore pass them as element children.
+    'elements' => $row_elements,
+    '#header' => array(
+      // We need two empty columns for the weight field and the cross.
+      array('data' => NULL, 'colspan' => 2),
+      t('Enabled'),
+      t('Name'),
+      t('Machine name'),
+      t('Description'),
+      t('Operations'),
+    ),
+    '#rows' => $rows,
+    '#empty' => t('There are no entries available.'),
+    '#attributes' => array('id' => 'entry-order-components'),
+  );
+  drupal_add_tabledrag('entry-order-components', 'order', 'sibling', 'entry-order-weight');
+
+  return $form;
+}
+
+/**
+ * Map components config form submit handler.
+ */
+function leaflet_map_form_components_submit($form, &$form_state) {
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
+
+  $components_enabled = array_filter($form_state['values']['components'], function ($item) {
+    return (bool) $item['enabled'];
+  });
+
+  $map->getCollection()->clear(array('component'));
+  foreach ($components_enabled as $component => $data) {
+    $component = \Drupal\leaflet\Leaflet::load('component', $component);
+    $component->setWeight($data['weight']);
+    $map->getCollection()->append($component);
+  }
+
+  $form_state['item'] = $map->getExport();
+}
+
+/**
+ * Map styles config form handler.
+ */
+function leaflet_map_form_styles($form, &$form_state) {
+  $all_styles = \Drupal\leaflet\Leaflet::loadAllExportable('Style');
 
   $header = array(
     'name' => t('Name'),
@@ -353,60 +572,64 @@ function leaflet_map_form_components($form, &$form_state) {
   );
 
   $rows = array();
-  foreach ($all_components as $machine_name => $component) {
-    $rows[$machine_name] = array(
-      'name' => $component->name,
-      'machine_name' => $component->machine_name,
-      'description' => $component->description,
-      'operations' => l(
-        t('Edit'),
-        'admin/structure/leaflet/components/list/' . $machine_name . '/edit/options',
-        array(
-          'query' => array(
-            'destination' => current_path(),
-          ),
-          'attributes' => array(
-            // Todo: Use CTools modal window ajax for this form.
-            'class' => 'ctools-use-modall',
-          ),
-        )
-      ),
-    );
+  foreach ($all_styles as $machine_name => $style) {
+    if (is_object($style)) {
+      $rows[$machine_name] = array(
+        'name' => $style->name,
+        'machine_name' => $style->machine_name,
+        'description' => $style->description,
+        'operations' => l(
+          t('Edit'),
+          'admin/structure/leaflet/styles/list/' . $machine_name . '/edit/options',
+          array(
+            'query' => array(
+              'destination' => current_path(),
+            ),
+          )
+        ),
+      );
+    }
   }
 
   $form['options']['#tree'] = TRUE;
 
-  if (!isset($form_state['item']->options['components'])) {
-    $form_state['item']->options['components'] = array();
-  }
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
+  $export = $map->getExport();
 
-  $form['options']['components'] = array(
+  $form['options']['styles'] = array(
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $rows,
-    '#default_value' => drupal_map_assoc($form_state['item']->options['components']),
+    '#default_value' => isset($export->options['styles']) ? drupal_map_assoc($export->options['styles']) : array(),
   );
 
   return $form;
 }
 
 /**
- * Map components config form submit handler.
+ * Map styles config form submit handler.
  */
-function leaflet_map_form_components_submit($form, &$form_state) {
-  if (isset($form_state['values']['options'])) {
-    $form_state['item']->options = array_merge((array) $form_state['item']->options, (array) $form_state['values']['options']);
+function leaflet_map_form_styles_submit($form, &$form_state) {
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
+
+  $styles_enabled = array_filter($form_state['values']['options']['styles']);
+
+  $map->getCollection()->clear(array('style'));
+  foreach ($styles_enabled as $style => $data) {
+    $style = \Drupal\leaflet\Leaflet::load('style', $style);
+    $map->getCollection()->append($style);
   }
-  $form_state['item']->options['components'] = array_filter(array_values($form_state['values']['options']['components']));
+
+  $form_state['item'] = $map->getExport();
 }
 
 /**
  * Map preview form handler.
  */
 function leaflet_map_form_preview($form, &$form_state) {
-  $map = leaflet_object_load('Map', $form_state['item']);
-  $form['preview'] = $map->build();
-
+  if (($map = \Drupal\leaflet\Leaflet::load('Map', $form_state['item'])) == TRUE) {
+    $form['preview'] = $map->build();
+  }
   return $form;
 }
 
@@ -415,14 +638,4 @@ function leaflet_map_form_preview($form, &$form_state) {
  */
 function leaflet_map_form_preview_submit($form, &$form_state) {
 
-}
-
-/**
- * Helper function to sort an array by item weight.
- */
-function _leaflet_maps_sort_by_weight($a, $b) {
-  if (isset($a['weight']) && isset($b['weight'])) {
-    return $a['weight'] < $b['weight'] ? -1 : 1;
-  }
-  return 0;
 }

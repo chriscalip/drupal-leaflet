@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * Class leaflet_component.
+ * Class Component.
  */
 
 namespace Drupal\leaflet\Types;
 
 /**
- * Class leaflet_component.
+ * Class Component.
  */
 abstract class Component extends Object implements ComponentInterface {
 

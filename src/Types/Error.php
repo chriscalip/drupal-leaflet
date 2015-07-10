@@ -1,14 +1,26 @@
 <?php
 /**
  * @file
- * Class leaflet_config.
+ * Contains class Error.
  */
 
 namespace Drupal\leaflet\Types;
+
+use Drupal\leaflet\Component\Annotation\LeafletPlugin;
 use Drupal\Core\Logger\LoggerChannelInterface;
+use Drupal\leaflet\Types\Object;
+use Drupal\service_container\Messenger\MessengerInterface;
 
 /**
- * Class leaflet_config.
+ * Class Error.
+ *
+ * @LeafletPlugin(
+ *   id = "Error",
+ *   arguments = {
+ *     "@logger.channel.default",
+ *     "@messenger"
+ *   }
+ * )
  *
  * Dummy class to avoid breaking the whole processing if a plugin class is
  * missing.
@@ -20,13 +32,27 @@ class Error extends Object {
    */
   public $errorMessage;
 
+  /**
+   * The loggerChannel service.
+   *
+   * @var \Drupal\Core\Logger\LoggerChannelInterface
+   */
   protected $loggerChannel;
+
+  /**
+   * The messenger service.
+   *
+   * @var \Drupal\service_container\Messenger\MessengerInterface
+   */
+  protected $messenger;
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(LoggerChannelInterface $logger_channel) {
+  public function __construct($configuration, $plugin_id, $plugin_definition, LoggerChannelInterface $logger_channel, MessengerInterface $messenger) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->loggerChannel = $logger_channel;
+    $this->messenger = $messenger;
 
     foreach ($this->defaultProperties() as $property => $value) {
       $this->{$property} = $value;
@@ -45,17 +71,17 @@ class Error extends Object {
   /**
    * {@inheritdoc}
    */
-  public function init(array $data) {
-    foreach ($data as $property => $value) {
-      $this->{$property} = $data[$property];
+  public function init() {
+    foreach ($this->configuration as $property => $value) {
+      $this->{$property} = $this->configuration[$property];
     }
 
-    if (isset($data['options'])) {
-      $this->options = array_replace_recursive((array) $this->options, (array) $data['options']);
+    if (isset($this->configuration['options'])) {
+      $this->options = array_replace_recursive((array) $this->options, (array) $this->configuration['options']);
     }
 
     $this->loggerChannel->error($this->getMessage(), array('channel' => 'leaflet'));
-    drupal_set_message($this->getMessage(), 'error', FALSE);
+    $this->messenger->addMessage($this->getMessage(), 'error', FALSE);
   }
 
   /**
@@ -72,21 +98,6 @@ class Error extends Object {
       '@type' => $type,
     ));
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLayers() {
-    return array();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getComponents() {
-    return array();
-  }
-
 
   /**
    * {@inheritdoc}

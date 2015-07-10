@@ -5,11 +5,6 @@
  */
 
 /**
- * The Leaflet library URI.
- */
-define('LEAFLET_DOWNLOAD_URI', 'http://leaflet-cdn.s3.amazonaws.com/build/leaflet-0.7.3.zip');
-
-/**
  * Implements hook_drush_command().
  */
 function leaflet_drush_command() {
@@ -60,8 +55,10 @@ function drush_leaflet_plugin() {
   $olddir = getcwd();
   chdir($path);
 
+  $library = libraries_detect('leaflet');
+
   // Download the archive.
-  if ($filepath = drush_download_file(LEAFLET_DOWNLOAD_URI)) {
+  if ($filepath = drush_download_file($library['download url'])) {
     $filename = basename($filepath);
     $dirname = basename($filepath, '.zip');
 
@@ -73,9 +70,8 @@ function drush_leaflet_plugin() {
     }
 
     // Decompress the archive.
-    drush_tarball_extract($filename);
-    drush_move_dir($dirname, 'leaflet', TRUE);
     $dirname = 'leaflet';
+    drush_tarball_extract($filename, $dirname);
   }
 
   if (is_dir($dirname)) {

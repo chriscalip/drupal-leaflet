@@ -1,54 +1,62 @@
 <?php
 /**
  * @file
- * Class leaflet_object.
+ * Class Object.
  */
 
 namespace Drupal\leaflet\Types;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\leaflet\Config;
+use Drupal\leaflet\Leaflet;
+use Drupal\leaflet\Types\Collection;
+use Drupal\leaflet\Types\ObjectInterface;
 
 /**
- * Class leaflet_object.
+ * Class Object.
  */
 abstract class Object extends PluginBase implements ObjectInterface {
 
   /**
+   * The unique machine name.
+   *
    * @var string
    */
   public $machine_name;
 
   /**
+   * The human readable name.
+   *
    * @var string
    */
   public $name;
 
   /**
+   * A short description.
+   *
    * @var string
    */
   public $description;
 
   /**
-   * @var string
+   * @var int
    */
-  public $class;
-
-  /**
-   * @var array
-   */
-  public $options = array();
+  protected $weight = -1;
 
   /**
    * @var string
    */
   public $factory_service = NULL;
 
+  protected $options = array();
+
   /**
    * @var Collection
    */
-  protected $collection = NULL;
+  protected $collection;
 
   /**
+   * Holds all the attachment used by this object.
+   *
    * @var array
    */
   protected $attached = array(
@@ -72,32 +80,14 @@ abstract class Object extends PluginBase implements ObjectInterface {
   }
 
   /**
-   * Constructs a Drupal\Component\Plugin\PluginBase object.
-   *
-   * @param array $configuration
-   *   A configuration array containing information about the plugin instance.
-   */
-  public function __construct(array $configuration) {
-    // @todo This needs to be check in depth.
-    $this->pluginDefinition = $configuration;
-    $this->pluginId = strtolower($configuration['plugin module'] . '.' . $configuration['plugin type']) . '.' . 'internal.' . $configuration['name'];
-    $this->configuration = $configuration;
-  }
-
-  /**
    * {@inheritdoc}
    */
-  public function init(array $data) {
+  public function init() {
     // Mash the provided configuration with the defaults.
     foreach ($this->defaultProperties() as $property => $value) {
-      if (isset($data[$property])) {
-        $this->{$property} = $data[$property];
+      if (isset($this->configuration[$property])) {
+        $this->{$property} = $this->configuration[$property];
       }
-    }
-
-    // If there are options ensure the provided ones overwrite the defaults.
-    if (isset($data['options'])) {
-      $this->options = array_replace_recursive((array) $this->options, (array) $data['options']);
     }
 
     // We need to ensure the object has a proper machine name.
@@ -105,15 +95,9 @@ abstract class Object extends PluginBase implements ObjectInterface {
       $this->machine_name = drupal_html_id($this->getType() . '-' . time());
     }
 
-    $this->buildCollection();
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function buildCollection() {
-    $this->getCollection()->append($this);
-    return $this->getCollection();
+    if (!empty($this->configuration['options'])) {
+      $this->setOptions($this->configuration['options']);
+    }
   }
 
   /**
@@ -128,21 +112,24 @@ abstract class Object extends PluginBase implements ObjectInterface {
   /**
    * {@inheritdoc}
    */
-  public function optionsFormValidate($form, &$form_state) {
-
-  }
+  public function optionsFormValidate($form, &$form_state) {}
 
   /**
    * {@inheritdoc}
    */
   public function optionsFormSubmit($form, &$form_state) {
+    if (isset($form_state['values']['options'])) {
+      $options = array_merge((array) $this->getOptions(), (array) $form_state['values']['options']);
+      $this->setOptions($options);
+    }
 
+    $form_state['item'] = $this->getExport();
   }
 
   /**
    * {@inheritdoc}
    */
-  public function preBuild(array &$build, \Drupal\leaflet\Types\ObjectInterface $context = NULL) {
+  public function preBuild(array &$build, ObjectInterface $context = NULL) {
     foreach ($this->getCollection()->getFlatList() as $object) {
       if ($object !== $this) {
         $object->preBuild($build, $this);
@@ -155,7 +142,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
   /**
    * {@inheritdoc}
    */
-  public function postBuild(array &$build, \Drupal\leaflet\Types\ObjectInterface $context = NULL) {
+  public function postBuild(array &$build, ObjectInterface $context = NULL) {
     foreach ($this->getCollection()->getFlatList() as $object) {
       if ($object !== $this) {
         $object->postBuild($build, $context);
@@ -168,9 +155,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
   /**
    * {@inheritdoc}
    */
-  public function build() {
-
-  }
+  public function build() {}
 
   /**
    * {@inheritdoc}
@@ -224,15 +209,75 @@ abstract class Object extends PluginBase implements ObjectInterface {
   /**
    * {@inheritdoc}
    */
-  public function getOption($parents, $default_value = NULL) {
-    $options = $this->options;
+  public function getOptions() {
+    $export = array_change_key_case($this->getCollection()->getExport(), CASE_LOWER);
+    $options = isset($this->options) ? $this->options : array();
 
+    // Synchronize this item's options with its the Collection.
+    foreach(Leaflet::getPluginTypes(array('map')) as $type) {
+      $option = drupal_strtolower($type) . 's';
+      if (isset($export[$type])) {
+        $options[$option] = $export[$type];
+      }
+    }
+
+    foreach(Leaflet::getPluginTypes() as $type) {
+      $type = drupal_strtolower($type) . 's';
+      unset($options[$type]);
+    }
+
+    $this->options = $options;
+
+    return $this->options;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setOptions(array $options = array()) {
+    $this->options = $options;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getExport() {
+    $configuration = $this->getConfiguration();
+    $options = $this->getOptions();
+
+    $options = array_map_recursive('_floatval_if_numeric', $options);
+    $options = removeEmptyElements($options);
+    $configuration['options'] = $options;
+
+    return (object) $configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getConfiguration() {
+    return $this->configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getOption($parents, $default_value = NULL) {
     if (is_string($parents)) {
       $parents = array($parents);
     }
 
     if (is_array($parents)) {
       $notfound = FALSE;
+
+      if (!isset($this->options)) {
+        $notfound = TRUE;
+        $parents = array();
+        $options = array();
+      } else {
+        $options = $this->options;
+      }
+
       foreach ($parents as $parent) {
         if (isset($options[$parent])) {
           $options = $options[$parent];
@@ -258,9 +303,11 @@ abstract class Object extends PluginBase implements ObjectInterface {
    * {@inheritdoc}
    */
   public function attached() {
-    if ($plugin = $this->getConfiguration()) {
-      $jsdir = $plugin['path'] . '/js';
-      $cssdir = $plugin['path'] . '/css';
+    if ($plugin = $this->getPluginDefinition()) {
+      $path = $this->getClassDirectory();
+
+      $jsdir = $path . '/js';
+      $cssdir = $path . '/css';
       if (file_exists($jsdir)) {
         foreach (file_scan_directory($jsdir, '/.*\.js$/') as $file) {
           $this->attached['js'][$file->uri] = array(
@@ -286,15 +333,25 @@ abstract class Object extends PluginBase implements ObjectInterface {
     return $this->attached;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getObjects($type = NULL) {
+    return array_values($this->getCollection()->getObjects($type));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getParents() {
-    $maps = ctools_export_crud_load_all('leaflet_maps');
     $parents = array();
 
-    foreach($maps as $map) {
-      $map = leaflet_object_load('map', $map);
-      foreach($map->getCollection()->getFlatList() as $object) {
-        if ($object->machine_name == $this->machine_name) {
-          $parents[$map->machine_name] = $map;
+    foreach (Leaflet::loadAll('Map') as $map) {
+      if (is_object($map)) {
+        foreach ($map->getCollection()->getFlatList() as $object) {
+          if ($object->machine_name == $this->machine_name) {
+            $parents[$map->machine_name] = $map;
+          }
         }
       }
     }
@@ -312,8 +369,25 @@ abstract class Object extends PluginBase implements ObjectInterface {
   /**
    * {@inheritdoc}
    */
-  public function getConfiguration() {
-    return $this->pluginDefinition;
+  public function getProvider() {
+    $class = explode('\\', $this->pluginDefinition['class']);
+    return $class[1];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getClassDirectory() {
+    $class = explode('\\', $this->pluginDefinition['class']);
+    return drupal_get_path('module', $this->getProvider()) . '/src/' . implode('/', array_slice($class, 2, -1));
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getClassPath() {
+    $class = explode('\\', $this->pluginDefinition['class']);
+    return drupal_get_path('module', $this->getProvider()) . '/src/' . implode('/', array_slice($class, 2)) . '.php';
   }
 
   /**
@@ -328,15 +402,23 @@ abstract class Object extends PluginBase implements ObjectInterface {
    */
   public function getType() {
     $class = explode('\\', get_class($this));
-    return $class[2];
+    return $class[3];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildCollection() {
+    $this->getCollection()->append($this);
   }
 
   /**
    * {@inheritdoc}
    */
   public function getCollection() {
-    if (!($this->collection instanceof \Drupal\leaflet\Types\Collection)) {
-      $this->collection = \Drupal::service('leaflet.manager')->createInstance('collection');
+    if (!($this->collection instanceof Collection)) {
+      $this->collection = \Drupal::service('leaflet.Types')->createInstance('Collection');
+      $this->buildCollection();
     }
     return $this->collection;
   }
@@ -345,10 +427,35 @@ abstract class Object extends PluginBase implements ObjectInterface {
    * {@inheritdoc}
    */
   public function getJS() {
-    return array(
-      'mn' => $this->machine_name,
-      'fs' => strtolower($this->factory_service),
-      'opt' => $this->options,
+    $export = $this->getExport();
+
+    foreach(Leaflet::getPluginTypes() as $type) {
+      unset($export->options[$type . 's']);
+    }
+
+    $js = array(
+      'mn' => $export->machine_name,
+      'fs' => $export->factory_service,
     );
+
+    if (!empty($export->options)) {
+      $js['opt'] = $export->options;
+    }
+
+    return $js;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setWeight($weight) {
+    $this->weight = $weight;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getWeight() {
+    return intval($this->weight);
   }
 }

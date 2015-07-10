@@ -15,9 +15,12 @@ function leaflet_default_leaflet_layers() {
   $leaflet_layer->machine_name = 'leaflet_tilelayer_default';
   $leaflet_layer->name = 'Default layer';
   $leaflet_layer->description = '';
-  $leaflet_layer->factory_service = 'leaflet.layer.internal.TileLayer';
+  $leaflet_layer->factory_service = 'leaflet.Layer:TileLayer';
   $leaflet_layer->options = array(
-    'url' => '//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    'url' => 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    'minZoom' => 0,
+    'maxZoom' => 0,
+    'attributions' => 'coin'
   );
   $export['leaflet_tilelayer_default'] = $leaflet_layer;
 
@@ -26,7 +29,7 @@ function leaflet_default_leaflet_layers() {
   $leaflet_layer->machine_name = 'leaflet_examples_tilelayer_osm_de';
   $leaflet_layer->name = 'OpenStreetMap DE';
   $leaflet_layer->description = 'OpenStreetMap layer from openstreetmap.de';
-  $leaflet_layer->factory_service = 'leaflet.layer.internal.TileLayer';
+  $leaflet_layer->factory_service = 'leaflet.Layer:TileLayer';
   $leaflet_layer->options = array(
     'url' => '//{s}.tile.openstreetmap.de/tiles/osmde/{z}/{x}/{y}.png',
   );

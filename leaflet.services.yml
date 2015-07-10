@@ -1,0 +1,7 @@
+parameters:
+  annotated_plugins_auto_discovery.leaflet:
+    - { owner: 'leaflet', type: 'Component', directory: 'Plugin/Component', class: 'Drupal\leaflet\Component\Annotation\LeafletPlugin'}
+    - { owner: 'leaflet', type: 'Control', directory: 'Plugin/Control', class: 'Drupal\leaflet\Component\Annotation\LeafletPlugin'}
+    - { owner: 'leaflet', type: 'Layer', directory: 'Plugin/Layer', class: 'Drupal\leaflet\Component\Annotation\LeafletPlugin'}
+    - { owner: 'leaflet', type: 'Map', directory: 'Plugin/Map', class: 'Drupal\leaflet\Component\Annotation\LeafletPlugin'}
+    - { owner: 'leaflet', type: 'Types', directory: 'Types', class: 'Drupal\leaflet\Component\Annotation\LeafletPlugin'}

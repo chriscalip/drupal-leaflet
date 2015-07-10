@@ -16,7 +16,7 @@ function leaflet_geofield_default_leaflet_maps() {
   $leaflet_map->machine_name = $machine_name;
   $leaflet_map->name = 'Default Map for Leaflet Geofield';
   $leaflet_map->description = '';
-  $leaflet_map->factory_service = 'leaflet.map.internal.Map';
+  $leaflet_map->factory_service = 'leaflet.Map:LMap';
   $leaflet_map->options = array(
     'width' => 'auto',
     'height' => '300px',

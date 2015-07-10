@@ -1,15 +1,15 @@
 <?php
 /**
  * @file
- * Interface leaflet_map_interface.
+ * Interface MapInterface.
  */
 
 namespace Drupal\leaflet\Types;
 
 /**
- * Interface leaflet_map_interface.
+ * Interface MapInterface.
  */
-interface MapInterface {
+interface MapInterface extends ObjectInterface {
   /**
    * Returns the id of this map.
    *
@@ -17,22 +17,6 @@ interface MapInterface {
    *   The id of this map.
    */
   public function getId();
-
-  /**
-   * Returns the layer objects assigned to this map.
-   *
-   * @return array
-   *   List of layer objects assigned to this map.
-   */
-  public function getLayers();
-
-  /**
-   * Returns the component objects assigned to this map.
-   *
-   * @return array
-   *   List of component objects assigned to this map.
-   */
-  public function getComponents();
 
   /**
    * Build render array of a map.

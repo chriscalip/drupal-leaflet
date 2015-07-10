@@ -1,5 +1,5 @@
 Drupal.leaflet.pluginManager.register({
-  fs: 'leaflet.component.internal.geofield',
+  fs: 'leaflet.Component:Geofield',
   init: function(data) {
     var map = data.map;
     var geofieldWrapper = jQuery('#geofield-' + jQuery(data.map.getViewport()).parent().attr('id'));

@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Class Maps.
+ * Class leaflet_components_ui.
  */
 
-namespace Drupal\leaflet\UI;
+namespace Drupal\leaflet_ui\UI;
 
 /**
  * Class Maps.
@@ -68,9 +68,6 @@ class LeafletMaps extends \LeafletObjects {
     // Set up sorting.
     $name = $item->{$this->plugin['export']['key']};
     $schema = ctools_export_get_schema($this->plugin['schema']);
-
-    list($module, $plugin) = explode('.', $item->factory_service);
-    $object = leaflet_object_load($plugin, $item->machine_name);
 
     // Note: $item->{$schema['export']['export type string']} should have
     // already been set up by export.inc so we can use it safely.

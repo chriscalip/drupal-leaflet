@@ -17,7 +17,7 @@ function leaflet_geofield_default_leaflet_layers() {
   $leaflet_layer->machine_name = $machine_name;
   $leaflet_layer->name = 'Geofield Preset OpenStreetMap';
   $leaflet_layer->description = '';
-  $leaflet_layer->factory_service = 'leaflet.layer.internal.TileLayer';
+  $leaflet_layer->factory_service = 'leaflet.Layer:TileLayer';
   $leaflet_layer->options = array(
     'url' => '//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
   );

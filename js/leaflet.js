@@ -1,8 +1,16 @@
 Drupal.leaflet = (function($){
   "use strict";
   return {
+    instances: {},
     processMap: function (map_id, context) {
-      var settings = $.extend({}, {layer:[], control:[], component:[]}, Drupal.settings.leaflet.maps[map_id]);
+      var settings = $.extend({}, {layer:[], style:[], control:[], interaction:[], source: [], projection:[], component:[]}, Drupal.settings.leaflet.maps[map_id]);
+      var map = false;
+
+      // If already processed just return the instance.
+      if (typeof Drupal.leaflet.instances[map_id] !== 'undefined') {
+        console.log(Drupal.leaflet.instances[map_id]);
+        return Drupal.leaflet.instances[map_id].map;
+      }
 
       $(document).trigger('leaflet.build_start', [
         {
@@ -13,56 +21,82 @@ Drupal.leaflet = (function($){
       ]);
 
       try {
-        $(document).trigger('leaflet.map_pre_alter', [{context: context, cache: Drupal.leaflet.cacheManager}]);
-        var map = Drupal.leaflet.getObject(context, 'maps', settings.map, null);
-        Drupal.leaflet.cacheManager.set(map.mn, map);
-        $(document).trigger('leaflet.map_post_alter', [{map: map, cache: Drupal.leaflet.cacheManager}]);
+        $(document).trigger('leaflet.map_pre_alter', [{context: context, settings: settings, map_id: map_id}]);
+        map = Drupal.leaflet.getObject(context, 'maps', settings.map, map_id);
+        $(document).trigger('leaflet.map_post_alter', [{map: Drupal.leaflet.instances[map_id].map}]);
 
-        $(document).trigger('leaflet.layers_pre_alter', [{layers: settings.layer, cache: Drupal.leaflet.cacheManager}]);
+        $(document).trigger('leaflet.layers_pre_alter', [{layers: settings.layer, map_id: map_id}]);
         settings.layer.map(function (data) {
-          Drupal.leaflet.cacheManager.set(data.mn, Drupal.leaflet.getObject(context, 'layers', data, map));
-          map.addLayer(Drupal.leaflet.cacheManager.get(data.mn));
+          var layer = Drupal.leaflet.getObject(context, 'layers', data, map_id);
+          map.addLayer(layer);
         });
-        $(document).trigger('leaflet.layers_post_alter', [{layers: settings.layer, cache: Drupal.leaflet.cacheManager}]);
+        $(document).trigger('leaflet.layers_post_alter', [{layers: settings.layer, map_id: map_id}]);
 
-        $(document).trigger('leaflet.controls_pre_alter', [{controls: settings.control, cache: Drupal.leaflet.cacheManager}]);
-        settings.control.map(function (data) {
-          Drupal.leaflet.cacheManager.set(data.mn, Drupal.leaflet.getObject(context, 'controls', data, map));
-          map.addControl(Drupal.leaflet.cacheManager.get(data.mn));
-        });
-        $(document).trigger('leaflet.controls_post_alter', [{controls: settings.control, cache: Drupal.leaflet.cacheManager}]);
+        if (settings.control.length > 0) {
+          $(document).trigger('leaflet.controls_pre_alter', [{controls: settings.control, map_id: map_id}]);
+          settings.control.map(function (data) {
+            var control = Drupal.leaflet.getObject(context, 'controls', data, map_id);
+            if (control) {
+              map.addControl(control);
+            }
+          });
+          $(document).trigger('leaflet.controls_post_alter', [{controls: settings.control, map_id: map_id}]);
+        }
 
-        $(document).trigger('leaflet.components_pre_alter', [{components: settings.component, cache: Drupal.leaflet.cacheManager}]);
-        settings.component.map(function (data) {
-          Drupal.leaflet.cacheManager.set(data.mn, Drupal.leaflet.getObjectFromCache(context, 'components', data, map));
-        });
-        $(document).trigger('leaflet.components_post_alter', [{components: settings.component, cache: Drupal.leaflet.cacheManager}]);
+        if (settings.component.length > 0) {
+          $(document).trigger('leaflet.components_pre_alter', [{components: settings.component}]);
+          settings.component.map(function (data) {
+            Drupal.leaflet.getObject(context, 'components', data, map_id);
+          });
+        }
 
-        $(document).trigger('leaflet.build_stop', [
+      } catch (e) {
+        $('#' + map_id).empty();
+        $(document).trigger('leaflet.build_failed', [
           {
-            'type': 'objects',
-            'cache': Drupal.leaflet.cacheManager,
+            'error': e,
             'settings': settings,
             'context': context
           }
         ]);
-      } catch (e) {
-        if (typeof console != 'undefined') {
-          Drupal.leaflet.console.log(e.message);
-          Drupal.leaflet.console.log(e.stack);
-        } else {
-          $(this).text('Error during map rendering: ' + e.message);
-          $(this).text('Stack: ' + e.stack);
-        }
+        map = false;
       }
+
+      $(document).trigger('leaflet.build_stop', [
+        {
+          'type': 'objects',
+          'settings': settings,
+          'context': context
+        }
+      ]);
+
+      return map;
     },
 
-// Holds dynamic created asyncIsReady callbacks for every map id.
-// The functions are named by the cleaned map id. Everything besides 0-9a-z
-// is replaced by an underscore (_).
+    /**
+     * Return the map instance collection of a map_id.
+     *
+     * @param map_id
+     *   The id of the map.
+     * @returns object/false
+     *   The object or false if not instantiated yet.
+     */
+    getMapById: function (map_id) {
+      if (typeof Drupal.settings.leaflet.maps[map_id] !== 'undefined') {
+        // Return map if it is instantiated already.
+        if (Drupal.leaflet.instances[map_id]) {
+          return Drupal.leaflet.instances[map_id];
+        }
+      }
+      return false;
+    },
+
+    // Holds dynamic created asyncIsReady callbacks for every map id.
+    // The functions are named by the cleaned map id. Everything besides 0-9a-z
+    // is replaced by an underscore (_).
     asyncIsReadyCallbacks: {},
     asyncIsReady: function (map_id) {
-      if (typeof Drupal.settings.leaflet.maps[map_id] != 'undefined') {
+      if (typeof Drupal.settings.leaflet.maps[map_id] !== 'undefined') {
         Drupal.settings.leaflet.maps[map_id].map.async--;
         if (!Drupal.settings.leaflet.maps[map_id].map.async) {
           $('#' + map_id).once('leaflet-map', function () {
@@ -71,7 +105,33 @@ Drupal.leaflet = (function($){
         }
       }
     },
-    getObject: (function (context, type, data, map) {
+
+    /**
+     * Get an object of a map.
+     *
+     * If it isn't instantiated yet the instance is created.
+     */
+    getObject: (function (context, type, data, map_id) {
+      // If the type is maps the structure is slightly different.
+      var instances_type = type;
+      if (type == 'maps') {
+        instances_type = 'map';
+      }
+      // Prepare instances cache.
+      if (typeof Drupal.leaflet.instances[map_id] === 'undefined') {
+        Drupal.leaflet.instances[map_id] = {map:null, layers:{}, styles:{}, controls:{}, interactions:{}, sources:{}, projections:{}, components:{}};
+      }
+
+      // Check if we've already an instance of this object for this map.
+      if (typeof Drupal.leaflet.instances[map_id] !== 'undefined' && typeof Drupal.leaflet.instances[map_id][instances_type] !== 'undefined') {
+        if (instances_type != 'map' && typeof Drupal.leaflet.instances[map_id][instances_type][data.mn] !== 'undefined') {
+          return Drupal.leaflet.instances[map_id][instances_type][data.mn];
+        }
+        else if (instances_type == 'map' && Drupal.leaflet.instances[map_id][instances_type]) {
+          return Drupal.leaflet.instances[map_id][instances_type];
+        }
+      }
+
       var object = null;
       if (Drupal.leaflet.pluginManager.isRegistered(data['fs'])) {
         $(document).trigger('leaflet.object_pre_alter', [
@@ -79,59 +139,50 @@ Drupal.leaflet = (function($){
             'type': type,
             'mn': data.mn,
             'data': data,
-            'map': map,
-            'cache': Drupal.leaflet.cacheManager,
-            'context': context
+            'map': Drupal.leaflet.instances[map_id].map,
+            'objects': Drupal.leaflet.instances[map_id],
+            'context': context,
+            'map_id': map_id
           }
         ]);
         object = Drupal.leaflet.pluginManager.createInstance(data['fs'], {
           'data': data,
           'opt': data.opt,
-          'map': map,
-          'cache': Drupal.leaflet.cacheManager,
-          'context': context
+          'map': Drupal.leaflet.instances[map_id].map,
+          'objects': Drupal.leaflet.instances[map_id],
+          'context': context,
+          'map_id': map_id
         });
         $(document).trigger('leaflet.object_post_alter', [
           {
             'type': type,
             'mn': data.mn,
             'data': data,
-            'map': map,
-            'cache': Drupal.leaflet.cacheManager,
-            'context': context
+            'map': Drupal.leaflet.instances[map_id].map,
+            'objects': Drupal.leaflet.instances[map_id],
+            'context': context,
+            'object': object,
+            'map_id': map_id
           }
         ]);
+
+        // Store object to the instances cache.
+        if (type == 'maps') {
+          Drupal.leaflet.instances[map_id][instances_type] = object;
+        }
+        else {
+          Drupal.leaflet.instances[map_id][instances_type][data.mn] = object;
+        }
         return object;
       }
+      else {
+        Drupal.leaflet.log('fake', 'Factory service to build ' + type + ' not available: ' + data.fs);
+      }
     }),
-    getObjectFromCache: (function (context, type, data, map) {
-      var object = null;
-      if (!Drupal.leaflet.cacheManager.isRegistered(data.mn)) {
-        object = this.getObject(context, type, data, map);
-        Drupal.leaflet.cacheManager.set(data.mn, object);
-      } else {
-        $(document).trigger('leaflet.object_pre_alter', [
-          {
-            'type': type,
-            'mn': data.mn,
-            'data': data,
-            'map': map,
-            'cache': Drupal.leaflet.cacheManager,
-            'context': context
-          }
-        ]);
-        object = Drupal.leaflet.cacheManager.get(data.mn);
-        $(document).trigger('leaflet.object_post_alter', [
-          {
-            'type': type,
-            'mn': data.mn,
-            'data': data,
-            'map': map,
-            'cache': Drupal.leaflet.cacheManager,
-            'context': context
-          }
-        ]);      }
-      return object;
-    })
+    log: function(string) {
+      if (typeof Drupal.leaflet.console !== 'undefined') {
+        Drupal.leaflet.console.log(string);
+      }
+    }
   };
 })(jQuery);

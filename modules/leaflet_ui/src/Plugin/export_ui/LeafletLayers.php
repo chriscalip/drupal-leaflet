@@ -4,7 +4,7 @@
  * Class leaflet_layers_ui.
  */
 
-namespace Drupal\leaflet\UI;
+namespace Drupal\leaflet_ui\UI;
 
 /**
  * Class leaflet_layers_ui.

@@ -1,18 +1,13 @@
 /**
  * Logging implementation that logs using the browser's logging API.
  * Falls back to doing nothing in case no such API is available. Simulates
- * the presece of Firebug's console API in Drupal.leaflet.console.
+ * the presence of Firebug's console API in Drupal.leaflet.console.
  */
 Drupal.leaflet.console = (function($) {
   "use strict";
   var api = {};
   var logger;
-  logger = function(){
-    // Use console.log as fallback for missing parts of API if present.
-    console.log.apply(console, arguments);
-  };
-
-   if (typeof console == 'object' && typeof console.log == 'function'){
+  if (typeof console == 'object' && typeof console.log == 'function'){
     logger = function(){
       // Use console.log as fallback for missing parts of API if present.
       console.log.apply(console, arguments);

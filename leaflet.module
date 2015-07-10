@@ -17,96 +17,15 @@ function leaflet_ctools_plugin_api($module, $api) {
 }
 
 /**
- * Implements hook_ctools_plugin_directory().
+ * Implements hook_permission().
  */
-function leaflet_ctools_plugin_directory($owner, $plugin_type) {
-  if ($owner == 'leaflet') {
-    return 'src/Leaflet/' . str_replace("\\", DIRECTORY_SEPARATOR, $plugin_type);
-  }
-  if ($owner == 'service_container') {
-    return 'src/ServiceContainer/' . $plugin_type;
-  }
-}
-
-/**
- * Implements hook_ctools_plugin_type().
- */
-function leaflet_ctools_plugin_type() {
+function leaflet_permission() {
   return array(
-    'Map' => array(
-      'use hooks' => FALSE,
-      'extension' => 'php',
-    ),
-    'Layer' => array(
-      'use hooks' => FALSE,
-      'extension' => 'php',
-    ),
-    'Control' => array(
-      'use hooks' => FALSE,
-      'extension' => 'php',
-    ),
-    'Component' => array(
-      'use hooks' => FALSE,
-      'extension' => 'php',
+    'administer leaflet' => array(
+      'title' => t('Administer Leaflet'),
+      'description' => t('Configure Leaflet settings and maps.'),
     ),
   );
-}
-
-/**
- * Create an object instance for an export.
- *
- * @param string $object_type
- *   The object type to look up. See leaflet_object_types() for a list of
- *   available object types.
- * @param array|string|object $export
- *   The exported object.
- *
- * @return mixed|leaflet_error
- *   Returns the instance of the requested object or an instance of
- *   leaflet_error on error.
- */
-function leaflet_object_load($object_type, $export) {
-  // @todo: This needs to be refactored properly.
-  Leaflet::init();
-  ctools_include('export');
-
-  $object = NULL;
-  $exportable = array();
-
-  if (is_object($export)) {
-    $array_object = new ArrayObject($export);
-    $exportable = $array_object->getArrayCopy();
-  }
-  if (is_string($export)) {
-    $exportable = (array) ctools_export_crud_load('leaflet_' . strtolower($object_type) . 's', $export);
-  }
-
-  if (is_array($exportable) && isset($exportable['factory_service'])) {
-    if (Leaflet::hasService($exportable['factory_service'])) {
-      $service = explode('.', $exportable['factory_service']);
-      $object = \Drupal::service($service[0] . '.' . $service[1])->createInstance($service[3]);
-    } else {
-      $exportable += array(
-        'type' => $object_type,
-        'errorMessage' => 'Service <em>@service</em> doesn\'t exists, unable to load @type @machine_name',
-      );
-      $object = \Drupal::service('leaflet.manager')->createInstance('error');
-    }
-  } else {
-    $exportable += array(
-      'type' => $object_type,
-      'machine_name' => $export,
-      'errorMessage' => 'Unable to load CTools exportable @type @machine_name.',
-    );
-    $object = \Drupal::service('leaflet.manager')->createInstance('error');
-  }
-  $object->init($exportable);
-
-  if (isset($exportable['disabled']) && ($exportable['disabled'] == 1 || $exportable['disabled'] == TRUE)) {
-    $object->disabled = 1;
-  }
-
-  return $object;
 }
 
 /**
@@ -115,8 +34,8 @@ function leaflet_object_load($object_type, $export) {
 function leaflet_libraries_info() {
   $libraries['leaflet'] = array(
     'name' => 'Leaflet',
-    'vendor url' => 'http://leaflet.org/',
-    'download url' => 'TODO',
+    'vendor url' => 'http://leafletjs.com/',
+    'download url' => 'http://leaflet-cdn.s3.amazonaws.com/build/leaflet-0.7.3.zip',
     'version arguments' => array(
       'file' => 'leaflet-src.js',
       'pattern' => '@L.version = \'(.*)\'@',
@@ -144,11 +63,6 @@ function leaflet_libraries_info() {
           'js/leaflet.js' => array(
             'type' => 'file',
             'weight' => 8,
-            'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-          ),
-          'js/leaflet.cacheManager.js' => array(
-            'type' => 'file',
-            'weight' => 10,
             'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
           ),
           'js/leaflet.pluginManager.js' => array(
@@ -187,11 +101,6 @@ function leaflet_libraries_info() {
               'js/leaflet.js' => array(
                 'type' => 'file',
                 'weight' => 8,
-                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-              ),
-              'js/leaflet.cacheManager.js' => array(
-                'type' => 'file',
-                'weight' => 10,
                 'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
               ),
               'js/leaflet.pluginManager.js' => array(
@@ -233,6 +142,7 @@ function leaflet_element_info() {
       '#input' => FALSE,
       '#tree' => TRUE,
       '#process' => array('leaflet_element_process_callback'),
+      '#pre_render' => array('leaflet_element_prerender_callback'),
       '#theme_wrappers' => array('form_element'),
     ),
   );
@@ -243,9 +153,171 @@ function leaflet_element_info() {
  *
  * Renders the map and returns the markup in an renderable array.
  */
-function leaflet_element_process_callback($element, &$form_state) {
-  $map = leaflet_object_load('Map', $element['#map']);
-  $element['map'] = $map->build();
+function leaflet_element_process_callback($element, $form_state, $complete_form) {
+  /* @var \Drupal\leaflet\Types\Map $map */
+  if (($map = \Drupal\leaflet\Leaflet::load('Map', $element['#map'])) == TRUE) {
+    $element['map'] = $map->build();
+  }
 
   return $element;
+}
+
+/**
+ * Pre render callback for the leaflet form element.
+ */
+function leaflet_element_prerender_callback($element) {
+  if (empty($element['map'])) {
+    /* @var \Drupal\leaflet\Types\Map $map */
+    if (($map = \Drupal\leaflet\Leaflet::load('Map', $element['#map'])) == TRUE) {
+      $element['map'] = $map->build();
+    }
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_i18n_string_info().
+ */
+function leaflet_i18n_string_info() {
+  $groups['leaflet'] = array(
+    'title' => t('Leaflet'),
+    'format' => TRUE,
+  );
+  return $groups;
+}
+
+/**
+ * Translate a string using i18n_string, if available.
+ *
+ * @param string $name
+ *   Textgroup and context glued with ':'.
+ * @param string $default
+ *   String in default language. Default language may or may not be English.
+ * @param array $options
+ *   An associative array of additional options, with the following keys:
+ *   - langcode: the language code to translate to a language other than what is
+ *     used to display the page; defaults to the current language
+ *   - filter: filtering callback to apply to the translated string only
+ *   - format: input format to apply to the translated string only
+ *   - callback: callback to apply to the result (both to the translated or
+ *     untranslated string)
+ *   - update: whether to update source table; defaults to FALSE
+ *   - translate: whether to return a translation; defaults to TRUE.
+ *
+ * @return string
+ *   The translated string if i18n_string is available, the original otherwise.
+ *
+ * @see i18n_string()
+ */
+function leaflet_i18n_string($name, $default, $options = array()) {
+  if (module_exists('i18n_string')) {
+    $result = i18n_string($name, $default, $options);
+  }
+  else {
+    $result = $default;
+    $options += array(
+      'format' => NULL,
+      'sanitize' => FALSE,
+    );
+    if ($options['sanitize']) {
+      $result = check_markup($result, $options['format']);
+    }
+  }
+
+  return $result;
+}
+
+/**
+ * Wrapper to update / create translation source for user defined strings.
+ *
+ * Wrapper around i18n_string_update() that ensures the module is available.
+ *
+ * @param string|array $name
+ *   Array or string concatenated with ':' that contains textgroup and string
+ *   context.
+ * @param string $string
+ *   Source string in default language. Default language may or may not be
+ *   English. Array of key => string to update multiple strings at once.
+ * @param array $options
+ *   Array with additional options:
+ *   - 'format', String format if the string has text format
+ *   - 'messages', Whether to print out status messages.
+ *
+ * @return mixed
+ *   Same return as from i18n_string_update()
+ *
+ * @see i18n_string_update()
+ */
+function leaflet_i18n_string_update($name, $string, $options = array()) {
+  if (module_exists('i18n_string')) {
+    return i18n_string_update($name, $string, $options);
+  }
+}
+
+/**
+ * Wrapper to remove source and translations for user defined string.
+ *
+ * Though for most strings the 'name' or 'string id' uniquely identifies that
+ * string, there are some exceptions (like profile categories) for which we need
+ * to use the source string itself as a search key.
+ *
+ * @param string $name
+ *   String name.
+ * @param string $string
+ *   Optional source string (string in default language).
+ * @param array $options
+ *   Array of string properties to remove.
+ *
+ * @return mixed
+ *   Same return as from i18n_string_remove()
+ *
+ * @see i18n_string_remove()
+ */
+function leaflet_i18n_string_remove($name, $string = NULL, $options = array()) {
+  if (module_exists('i18n_string')) {
+    return i18n_string_remove($name, $string, $options);
+  }
+}
+
+/**
+ * Form callback handler to prepare the developer dialog form.
+ *
+ * Prepares an object options form to be used in a frontend development dialog.
+ *
+ * @param array $form
+ *   The form array - likely emtpy.
+ * @param array $form_state
+ *   The form state.
+ * @param object $object
+ *   The object that provides the options form. Has to have the public method
+ *   optionsForms().
+ *
+ * @return array
+ *   The populated form.
+ *
+ * @see \Drupal\leaflet\Plugin\Source\GeoJSON\GeoJSON::getJS()
+ */
+function leaflet_dev_dialog_form($form, $form_state, $object) {
+  $object->optionsForm($form, $form_state);
+  leaflet_dev_dialog_form_clean($form);
+  return $form;
+}
+
+/**
+ * Prepares a form structure to be added to a development dialog.
+ *
+ * Removes all JS related stuff.
+ *
+ * @param array $form
+ *   The form array to prepare.
+ */
+function leaflet_dev_dialog_form_clean(array &$form) {
+  foreach (element_children($form) as $key) {
+    unset(
+      $form[$key]['#states'],
+      $form[$key]['#attached']
+    );
+    leaflet_dev_dialog_form_clean($form[$key]);
+  }
 }

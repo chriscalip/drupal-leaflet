@@ -1,13 +1,13 @@
 <?php
 /**
  * @file
- * Class leaflet_control.
+ * Class Control.
  */
 
 namespace Drupal\leaflet\Types;
 
 /**
- * Class leaflet_control.
+ * Class Control.
  */
 abstract class Control extends Object implements ControlInterface {
 

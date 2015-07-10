@@ -5,7 +5,7 @@ Drupal.leaflet.pluginManager = (function($) {
     attach: function(context, settings) {
       for (var i in plugins) {
         var plugin = plugins[i];
-        if (typeof plugin.attach == 'function') {
+        if (typeof plugin.attach === 'function') {
           plugin.attach(context, settings);
         }
       }
@@ -13,7 +13,7 @@ Drupal.leaflet.pluginManager = (function($) {
     detach: function(context, settings) {
       for (var i in plugins) {
         var plugin = plugins[i];
-        if (typeof plugin.detach == 'function') {
+        if (typeof plugin.detach === 'function') {
           plugin.detach(context, settings);
         }
       }
@@ -31,18 +31,17 @@ Drupal.leaflet.pluginManager = (function($) {
       return Object.keys(plugins);
     },
     register: function(plugin) {
-      if (typeof plugin != 'object') {
+      if (typeof plugin !== 'object') {
         return false;
       }
 
-      if (!plugin.hasOwnProperty('fs') || typeof plugin.init != 'function') {
+      if (!plugin.hasOwnProperty('fs') || typeof plugin.init !== 'function') {
         return false;
       }
-      plugins[plugin.fs.toLowerCase()] = plugin;
+
+      plugins[plugin.fs] = plugin;
     },
     createInstance: function(factoryService, data) {
-      var factoryService = factoryService.toLowerCase();
-
       if (!this.isRegistered(factoryService)) {
         return false;
       }
@@ -50,7 +49,14 @@ Drupal.leaflet.pluginManager = (function($) {
       try {
         var obj = plugins[factoryService].init(data);
       } catch(e) {
-        // @todo: handler here.
+        if (typeof console !== 'undefined') {
+          Drupal.leaflet.console.log(e.message);
+          Drupal.leaflet.console.log(e.stack);
+        }
+        else {
+          $(this).text('Error during map rendering: ' + e.message);
+          $(this).text('Stack: ' + e.stack);
+        }
       }
 
       if (typeof obj == 'object') {
@@ -61,7 +67,7 @@ Drupal.leaflet.pluginManager = (function($) {
       return false;
     },
     isRegistered: function(factoryService) {
-      return (factoryService.toLowerCase() in plugins);
+      return (factoryService in plugins);
     }
   };
 })(jQuery);

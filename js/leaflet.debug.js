@@ -71,14 +71,10 @@
   });
 
   $(document).on('leaflet.object_pre_alter', function(event, objects) {
-    if (!Drupal.leaflet.cacheManager.isRegistered(objects.data.mn)) {
-      message = "Computing " + objects.type + " " + objects.data.mn + "...";
-    } else {
-      message = "Loading " + objects.type + " " + objects.data.mn + " from cache...";
-    }
-    console.groupCollapsed(message);
+    console.groupCollapsed("Loading " + objects.type + " " + objects.data.mn + '...');
+    console.info('Object data');
+    console.debug(objects.data);
     console.time('Time');
-
   });
   $(document).on('leaflet.object_post_alter', function(event, objects) {
     console.timeEnd('Time');
@@ -87,7 +83,17 @@
 
   $(document).on('leaflet.build_stop', function(event, objects) {
     console.timeEnd('Total building time');
-    console.log('Cache has ' + Object.keys(Drupal.leaflet.cacheManager.getCache()).length + ' objects.');
+    console.groupEnd();
     console.groupEnd();
   });
+
+  $(document).on('leaflet.build_failed', function(event, objects) {
+    console.timeEnd('Total building time');
+    console.groupEnd();
+    Drupal.leaflet.console.error(objects.error.message);
+    Drupal.leaflet.console.error(objects.error.stack);
+    $('#' + objects.settings.map.map_id).html('<pre><b>Error during map rendering:</b> ' + objects.error.message + '</pre>');
+    $('#' + objects.settings.map.map_id).append('<pre>' + objects.error.stack + '</pre>');
+  });
+
 })(jQuery);

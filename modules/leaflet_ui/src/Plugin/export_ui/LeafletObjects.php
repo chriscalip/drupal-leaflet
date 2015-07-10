@@ -1,13 +1,33 @@
 <?php
 /**
  * @file
- * Class LeafletObjectsUI.
+ * Class leaflet_objects_ui.
  */
 
 /**
- * Class LeafletObjectsUI.
+ * Class leaflet_objects_ui.
  */
 abstract class LeafletObjects extends ctools_export_ui {
+
+  /**
+   * Handle the submission of the edit form.
+   *
+   * At this point, submission is successful. Our only responsibility is
+   * to copy anything out of values onto the item that we are able to edit.
+   *
+   * If the keys all match up to the schema, this method will not need to be
+   * overridden.
+   */
+  function edit_form_submit(&$form, &$form_state) {
+    parent::edit_form_submit($form, $form_state);
+
+    if (isset($form_state['values']['attachToMap'])) {
+      $form_state['item']->attachToMap = $form_state['values']['attachToMap'];
+    }
+    if (isset($form_state['values']['attachToLayer'])) {
+      $form_state['item']->attachToLayer = $form_state['values']['attachToLayer'];
+    }
+  }
 
   /**
    * Create the filter/sort form at the top of a list of exports.
@@ -68,8 +88,12 @@ abstract class LeafletObjects extends ctools_export_ui {
     $name = $item->{$this->plugin['export']['key']};
     $schema = ctools_export_get_schema($this->plugin['schema']);
 
-    list($module, $plugin) = explode('.', $item->factory_service);
-    $object = leaflet_object_load($plugin, $item->machine_name);
+    list($plugin_manager, $plugin_id) = explode(':', $item->factory_service);
+    list($module, $plugin_type) = explode('.', $plugin_manager);
+    $count_parents = 0;
+    if ($object = \Drupal\leaflet\Leaflet::load($plugin_type, $item->machine_name)) {
+      $count_parents = count($object->getParents());
+    }
 
     // Note: $item->{$schema['export']['export type string']} should have
     // already been set up by export.inc so we can use it safely.
@@ -104,7 +128,7 @@ abstract class LeafletObjects extends ctools_export_ui {
     }
     $this->rows[$name]['data'][] = array('data' => check_plain($name), 'class' => array('ctools-export-ui-name'));
     $this->rows[$name]['data'][] = array('data' => check_plain($item->factory_service), 'class' => array('ctools-export-ui-service'));
-    $this->rows[$name]['data'][] = array('data' => check_plain(count($object->getParents())), 'class' => array('ctools-export-ui-parents'));
+    $this->rows[$name]['data'][] = array('data' => check_plain($count_parents), 'class' => array('ctools-export-ui-parents'));
     $this->rows[$name]['data'][] = array('data' => check_plain($item->{$schema['export']['export type string']}), 'class' => array('ctools-export-ui-storage'));
 
     $ops = theme('links__ctools_dropbutton', array(
@@ -153,13 +177,17 @@ abstract class LeafletObjects extends ctools_export_ui {
  * Wizard wrapper to add Save & edit button.
  */
 function leaflet_objects_ui_form_wrapper($form, $form_state) {
-  $form['buttons']['saveandedit'] = array(
-    '#name' => 'saveandedit',
-    '#type' => 'submit',
-    '#value' => t('Save & edit'),
-    '#wizard type' => 'finish',
-    '#weight' => 1,
-  );
-  $form['buttons']['cancel']['#weight'] = 20;
+
+  if ($form_state['step'] != 'start') {
+    $form['buttons']['saveandedit'] = array(
+      '#name' => 'saveandedit',
+      '#type' => 'submit',
+      '#value' => t('Save & edit'),
+      '#wizard type' => 'finish',
+      '#weight' => 1,
+    );
+    $form['buttons']['cancel']['#weight'] = 20;
+  }
+
   return $form;
 }

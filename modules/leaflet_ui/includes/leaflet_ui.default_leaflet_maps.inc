@@ -16,7 +16,7 @@ function leaflet_ui_default_leaflet_maps() {
   $leaflet_map->machine_name = 'leaflet_map_ui_default';
   $leaflet_map->name = 'Default UI Map';
   $leaflet_map->description = 'Map used if there are no other maps defined';
-  $leaflet_map->factory_service = 'leaflet.map.internal.Map';
+  $leaflet_map->factory_service = 'leaflet.Map:LMap';
   $leaflet_map->options = array(
     'width' => 'auto',
     'height' => '400px',
@@ -42,7 +42,7 @@ function leaflet_ui_default_leaflet_maps() {
   $leaflet_map->machine_name = 'leaflet_map_view_edit_form';
   $leaflet_map->name = 'Map view edit form';
   $leaflet_map->description = 'Map used in the the map edit form to get center, zoom';
-  $leaflet_map->factory_service = 'leaflet.map.internal.Map';
+  $leaflet_map->factory_service = 'leaflet.Map:LMap';
   $leaflet_map->options = array(
     'width' => 'auto',
     'height' => '400px',

@@ -30,7 +30,7 @@ function leaflet_examples_menu() {
   $items = array();
 
   $items['leaflet_examples'] = array(
-    'title' => 'Leaflet 3.1.x examples',
+    'title' => 'Leaflet examples',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('leaflet_examples'),
     'access arguments' => array('access content'),
@@ -92,7 +92,7 @@ function leaflet_examples($form, &$form_state, $map_arg = NULL) {
   );
 
   foreach ($maps as $map) {
-    $map = leaflet_object_load('Map', $map);
+    $map = \Drupal\leaflet\Leaflet::load('Map', $map);
 
     $form['form'][$map->getId()] = array(
       '#type' => 'fieldset',
@@ -193,6 +193,11 @@ function leaflet_examples($form, &$form_state, $map_arg = NULL) {
     '#value' => 0,
   );
 */
+
+  $library = \Drupal\leaflet\Leaflet::getLibrary();
+  $form['version'] = array(
+    '#markup' => 'Module running Leaflet version: ' . $library['version'],
+  );
 
   // This is for preventing 'system/ajax' as destination when using AJAX maps.
   // See: http://drupal.stackexchange.com/questions/86958/get-current-url-arguments-inside-ajax-callback

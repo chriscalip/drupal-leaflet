@@ -15,7 +15,7 @@
  * @return array
  *   The processed array-
  */
-function _leaflet_array_map_recursive($func, array $arr) {
+function array_map_recursive($func, array $arr) {
   /*
   // This is the PHP Version >= 5.5
   // $func must be a callable.
@@ -26,7 +26,7 @@ function _leaflet_array_map_recursive($func, array $arr) {
   */
   foreach ($arr as $key => $value) {
     if (is_array($arr[$key])) {
-      $arr[$key] = _leaflet_array_map_recursive($func, $arr[$key]);
+      $arr[$key] = array_map_recursive($func, $arr[$key]);
     }
     else {
       $arr[$key] = call_user_func($func, $arr[$key]);
@@ -44,9 +44,9 @@ function _leaflet_array_map_recursive($func, array $arr) {
  * @return float|mixed
  *   The variable - casted to type float if possible.
  */
-function _leaflet_floatval_if_numeric($var) {
+function _floatval_if_numeric($var) {
   if (is_numeric($var)) {
-    return floatval($var);
+    return is_float($var) ? floatval($var) : intval($var);
   }
   return $var;
 }
@@ -64,76 +64,14 @@ function _leaflet_floatval_if_numeric($var) {
  * @return array
  *   The cleaned array.
  */
-function _leaflet_removeEmptyElements($array) {
+function removeEmptyElements($array) {
   foreach ($array as $key => $value) {
     if (empty($value) && $value != 0) {
       unset($array[$key]);
     }
     elseif (is_array($value)) {
-      $array[$key] = _leaflet_removeEmptyElements($value);
+      $array[$key] = removeEmptyElements($value);
     }
   }
   return $array;
-}
-
-/**
- * Returns an array with positioning options.
- *
- * @return array
- *   Array with positioning options.
- */
-function leaflet_positioning_options() {
-  return array(
-    'bottom-left' => t('bottom-left'),
-    'bottom-center' => t('bottom-center'),
-    'bottom-right' => t('bottom-right'),
-    'center-left' => t('center-left'),
-    'center-center' => t('center-center'),
-    'center-right' => t('center-right'),
-    'top-left' => t('top-left'),
-    'top-center' => t('top-center'),
-    'top-right' => t('top-right'),
-  );
-}
-
-/**
- * Returns an array with available source options.
- *
- * @param bool $empty_option
- *   If disabled no empty option is added.
- *
- * @return array
- *   Array with source options.
- */
-function leaflet_source_options($empty_option = TRUE) {
-  $sources = ctools_export_crud_load_all('leaflet_sources');
-  $options = array();
-  if ($empty_option) {
-    $options[''] = t('<Choose the source>');
-  }
-  foreach ($sources as $machine_name => $data) {
-    $options[$machine_name] = $data->name;
-  }
-  return $options;
-}
-
-/**
- * Returns an array with available layer options.
- *
- * @param bool $empty_option
- *   If disabled no empty option is added.
- *
- * @return array
- *   Array with layer options.
- */
-function leaflet_layer_options($empty_option = TRUE) {
-  $layers = ctools_export_crud_load_all('leaflet_layers');
-  $options = array();
-  if ($empty_option) {
-    $options[''] = t('<Choose the layer>');
-  }
-  foreach ($layers as $machine_name => $data) {
-    $options[$machine_name] = $data->name;
-  }
-  return $options;
 }

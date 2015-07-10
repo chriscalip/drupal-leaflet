@@ -1,14 +1,14 @@
 <?php
 /**
  * @file
- * Interface leaflet_control_interface.
+ * Interface ControlInterface.
  */
 
 namespace Drupal\leaflet\Types;
 
 /**
- * Interface leaflet_control_interface.
+ * Interface ControlInterface.
  */
-interface ControlInterface {
+interface ControlInterface extends ObjectInterface {
 
 }

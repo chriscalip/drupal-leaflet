@@ -15,11 +15,11 @@ function leaflet_ui_LeafletLayers_ctools_export_ui() {
       'menu prefix' => 'admin/structure/leaflet',
       'menu item' => 'layers',
       'menu title' => 'Layers',
-      'menu description' => 'Administer Leaflet layers presets.',
+      'menu description' => 'Administer OpenLayers layers presets.',
     ),
 
     'handler' => array(
-      'class' => '\\Drupal\\leaflet\\UI\\LeafletLayers',
+      'class' => '\\Drupal\\leaflet_ui\\UI\\LeafletLayers',
       'file' => 'LeafletLayers.php',
     ),
 
@@ -28,6 +28,7 @@ function leaflet_ui_LeafletLayers_ctools_export_ui() {
       'order' => array(
         'start' => t('Administrative settings'),
         'type' => t('Layer type'),
+        'style' => t('Layer style'),
         'options' => t('Layer type options'),
       ),
       'forms' => array(
@@ -36,6 +37,9 @@ function leaflet_ui_LeafletLayers_ctools_export_ui() {
         ),
         'type' => array(
           'form id' => 'leaflet_layer_form_type',
+        ),
+        'style' => array(
+          'form id' => 'leaflet_layer_form_style',
         ),
         'options' => array(
           'form id' => 'leaflet_layer_form_options',
@@ -51,8 +55,8 @@ function leaflet_ui_LeafletLayers_ctools_export_ui() {
 
     'title singular' => t('layer'),
     'title plural' => t('layers'),
-    'title singular proper' => t('Leaflet preset'),
-    'title plural proper' => t('Leaflet Layers presets'),
+    'title singular proper' => t('OpenLayers preset'),
+    'title plural proper' => t('OpenLayers Layers presets'),
 
     'strings' => array(
       'confirmation' => array(
@@ -71,25 +75,25 @@ function leaflet_ui_LeafletLayers_ctools_export_ui() {
  * Layer base config form handler.
  */
 function leaflet_layer_form_start($form, &$form_state) {
-  $class = new \Drupal\leaflet\UI\LeafletLayers();
+  $class = new \Drupal\leaflet_ui\UI\LeafletLayers();
   $class->init($form_state['plugin']);
   $class->edit_form($form, $form_state);
 
-  $maps = ctools_export_crud_load_all('leaflet_maps');
-  $options = array('' => 'Dont attach');
-  foreach ($maps as $machine_name => $data) {
-    $map = leaflet_object_load('Map', $machine_name);
-    if (property_exists($map, 'disabled') && ($map->disabled == 1 || $map->disabled == TRUE)) {
+  $options = array();
+  foreach (\Drupal\leaflet\Leaflet::loadAllExportable('Map') as $machine_name => $map) {
+    if (!is_object($map) || (property_exists($map, 'disabled') && ($map->disabled == 1 || $map->disabled == TRUE))) {
       continue;
     }
-    $options[$machine_name] = $data->name;
+    $options[$machine_name] = $map->name;
   }
 
   $form['attachToMap'] = array(
     '#type' => 'select',
     '#title' => 'Add this to a map ?',
+    '#empty_option' => t('- Do no attach -'),
     '#description' => 'Select the map to add this object to.',
     '#options' => $options,
+    '#default_value' => isset($form_state['item']->attachToMap) ? $form_state['item']->attachToMap : '',
   );
 
   return $form;
@@ -99,7 +103,7 @@ function leaflet_layer_form_start($form, &$form_state) {
  * Layer base config form validation handler.
  */
 function leaflet_layer_form_start_validate($form, &$form_state) {
-  $class = new \Drupal\leaflet\UI\LeafletLayers();
+  $class = new \Drupal\leaflet_ui\UI\LeafletLayers();
   $class->init($form_state['plugin']);
   $class->edit_form_validate($form, $form_state);
 }
@@ -108,15 +112,9 @@ function leaflet_layer_form_start_validate($form, &$form_state) {
  * Layer base config form submit handler.
  */
 function leaflet_layer_form_start_submit($form, &$form_state) {
-  $class = new \Drupal\leaflet\UI\LeafletLayers();
+  $class = new \Drupal\leaflet_ui\UI\LeafletLayers();
   $class->init($form_state['plugin']);
   $class->edit_form_submit($form, $form_state);
-
-  if ($form_state['values']['attachToMap']) {
-    $map = ctools_export_crud_load('leaflet_maps', $form_state['values']['attachToMap']);
-    $map->options['layers'][] = $form_state['item']->machine_name;
-    ctools_export_crud_save('leaflet_maps', $map);
-  }
 }
 
 /**
@@ -126,20 +124,25 @@ function leaflet_layer_form_type($form, &$form_state) {
   $form['factory_service'] = array(
     '#type' => 'select',
     '#title' => t('Type'),
+    '#empty_option' => t('- Select a @plugin type -', array('@plugin' => 'Layer')),
     '#default_value' => isset($form_state['item']->factory_service) ? $form_state['item']->factory_service : '',
     '#description' => t('Select the type of layer.'),
-    '#options' => Leaflet::getLeafletObjectsOptions('Layer'),
+    '#options' => \Drupal\leaflet\Leaflet::getOLObjectsOptions('Layer'),
     '#required' => TRUE,
   );
 
-  $sources = ctools_export_crud_load_all('leaflet_sources');
-  $options = array('' => t('<Choose the source>'));
-  foreach ($sources as $machine_name => $data) {
-    $options[$machine_name] = $data->name;
-  }
-
   $form['options'] = array(
     '#tree' => TRUE,
+  );
+
+  $form['options']['source'] = array(
+    '#type' => 'select',
+    '#title' => t('Source'),
+    '#empty_option' => t('- Select a Source -'),
+    '#default_value' => isset($form_state['item']->options['source']) ? $form_state['item']->options['source'] : '',
+    '#description' => t('Select the source.'),
+    '#options' => \Drupal\leaflet\Leaflet::loadAllAsOptions('Source'),
+    '#required' => TRUE,
   );
 
   $form['options']['visible'] = array(
@@ -163,12 +166,43 @@ function leaflet_layer_form_type_submit($form, &$form_state) {
 }
 
 /**
+ * Layer style config form handler.
+ */
+function leaflet_layer_form_style($form, &$form_state) {
+  $form['options'] = array(
+    '#tree' => TRUE,
+  );
+
+  $form['options']['style'] = array(
+    '#type' => 'select',
+    '#title' => t('Style'),
+    '#empty_option' => t('- Select a Style -'),
+    '#default_value' => isset($form_state['item']->options['style']) ? $form_state['item']->options['style'] : '',
+    '#description' => t('Select the style.'),
+    '#options' => \Drupal\leaflet\Leaflet::loadAllAsOptions('Style'),
+    '#required' => TRUE,
+  );
+
+  return $form;
+}
+
+/**
+ * Layer style config form submit handler.
+ */
+function leaflet_layer_form_style_submit($form, &$form_state) {
+  if (isset($form_state['values']['options'])) {
+    $form_state['item']->options = array_merge((array) $form_state['item']->options, (array) $form_state['values']['options']);
+  }
+}
+
+/**
  * Layer options config form handler.
  */
 function leaflet_layer_form_options($form, &$form_state) {
-  $layer = leaflet_object_load('Layer', $form_state['item']);
-  $layer->optionsForm($form, $form_state);
-  $form['options']['#tree'] = TRUE;
+  if (($layer = \Drupal\leaflet\Leaflet::load('Layer', $form_state['item'])) == TRUE) {
+    $layer->optionsForm($form, $form_state);
+    $form['options']['#tree'] = TRUE;
+  }
 
   return $form;
 }
@@ -177,8 +211,9 @@ function leaflet_layer_form_options($form, &$form_state) {
  * Layer options config form validation handler.
  */
 function leaflet_layer_form_options_validate($form, &$form_state) {
-  $layer = leaflet_object_load('Layer', $form_state['item']);
-  $layer->optionsFormValidate($form, $form_state);
+  if (($layer = \Drupal\leaflet\Leaflet::load('Layer', $form_state['item'])) == TRUE) {
+    $layer->optionsFormValidate($form, $form_state);
+  }
 }
 
 /**
@@ -188,6 +223,14 @@ function leaflet_layer_form_options_submit($form, &$form_state) {
   if (isset($form_state['values']['options'])) {
     $form_state['item']->options = array_merge((array) $form_state['item']->options, (array) $form_state['values']['options']);
   }
-  $layer = leaflet_object_load('Layer', $form_state['item']);
-  $layer->optionsFormSubmit($form, $form_state);
+
+  if (($layer = \Drupal\leaflet\Leaflet::load('Layer', $form_state['item'])) == TRUE) {
+    if (!empty($form_state['item']->attachToMap) && ($map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']->attachToMap)) == TRUE) {
+      $map->getCollection()->append($layer);
+      \Drupal\leaflet\Leaflet::save($map);
+      unset($form_state['item']->attachToMap);
+    }
+
+    $layer->optionsFormSubmit($form, $form_state);
+  }
 }

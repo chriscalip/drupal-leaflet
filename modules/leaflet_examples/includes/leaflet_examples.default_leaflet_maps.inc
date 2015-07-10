@@ -16,7 +16,7 @@ function leaflet_examples_default_leaflet_maps() {
   $leaflet_map->machine_name = 'leaflet_map_view_edit_form';
   $leaflet_map->name = 'Map view edit form';
   $leaflet_map->description = 'Map used in the the map edit form to get center, zoom';
-  $leaflet_map->factory_service = 'leaflet.map.internal.Map';
+  $leaflet_map->factory_service = 'leaflet.Map:LMap';
   $leaflet_map->options = array(
     'width' => 'auto',
     'height' => '400px',
@@ -41,7 +41,7 @@ function leaflet_examples_default_leaflet_maps() {
   $leaflet_map->machine_name = 'leaflet_examples_map_osm_fr';
   $leaflet_map->name = 'Map with Openstreetmap FR layer';
   $leaflet_map->description = '';
-  $leaflet_map->factory_service = 'leaflet.map.internal.Map';
+  $leaflet_map->factory_service = 'leaflet.Map:LMap';
   $leaflet_map->options = array(
     'width' => 'auto',
     'height' => '400px',
@@ -66,7 +66,7 @@ function leaflet_examples_default_leaflet_maps() {
   $leaflet_map->machine_name = 'leaflet_examples_map_osm_de';
   $leaflet_map->name = 'Map with Openstreetmap DE layer';
   $leaflet_map->description = '';
-  $leaflet_map->factory_service = 'leaflet.map.internal.Map';
+  $leaflet_map->factory_service = 'leaflet.Map:LMap';
   $leaflet_map->options = array(
     'width' => 'auto',
     'height' => '400px',

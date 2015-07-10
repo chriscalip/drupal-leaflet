@@ -16,7 +16,7 @@ function leaflet_geofield_default_leaflet_components() {
   $leaflet_component->machine_name = 'leaflet_geofield_component_geofield';
   $leaflet_component->name = 'Leaflet Geofield';
   $leaflet_component->description = '';
-  $leaflet_component->factory_service = 'leaflet.component.internal.Geofield';
+  $leaflet_component->factory_service = 'leaflet.Component:Geofield';
   $leaflet_component->options = array(
     'dataType' => array(
       'GeoJSON' => 'GeoJSON',
