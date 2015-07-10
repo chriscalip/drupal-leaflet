@@ -15,15 +15,6 @@ function leaflet_examples_ctools_plugin_api($module, $api) {
 }
 
 /**
- * Implements hook_ctools_plugin_directory().
- */
-function leaflet_examples_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'leaflet') {
-    return 'src/Leaflet/' . str_replace("\\", DIRECTORY_SEPARATOR, $plugin);
-  }
-}
-
-/**
  * Implements hook_menu().
  */
 function leaflet_examples_menu() {

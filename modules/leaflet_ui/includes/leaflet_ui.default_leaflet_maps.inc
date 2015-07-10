@@ -33,6 +33,9 @@ function leaflet_ui_default_leaflet_maps() {
     'layers' => array(
       0 => 'leaflet_tilelayer_default',
     ),
+    'controls' => array(
+      0 => 'leaflet_control_zoom'
+    )
   );
   $export['leaflet_map_ui_default'] = $leaflet_map;
 
@@ -58,6 +61,9 @@ function leaflet_ui_default_leaflet_maps() {
     'layers' => array(
       0 => 'leaflet_tilelayer_default',
     ),
+    'controls' => array(
+      0 => 'leaflet_control_zoom'
+    )
   );
   $export['leaflet_map_view_edit_form'] = $leaflet_map;
 

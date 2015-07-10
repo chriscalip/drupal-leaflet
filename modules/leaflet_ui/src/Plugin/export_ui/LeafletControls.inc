@@ -19,7 +19,7 @@ function leaflet_ui_LeafletControls_ctools_export_ui() {
     ),
 
     'handler' => array(
-      'class' => '\\Drupal\\leaflet\\UI\\LeafletControls',
+      'class' => '\\Drupal\\leaflet_ui\\UI\\LeafletControls',
       'file' => 'LeafletControls.php',
     ),
 
@@ -71,14 +71,14 @@ function leaflet_ui_LeafletControls_ctools_export_ui() {
  * Control base config form handler.
  */
 function leaflet_control_form_start($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\LeafletControls();
+  $class = new Drupal\leaflet_ui\UI\LeafletControls();
   $class->init($form_state['plugin']);
   $class->edit_form($form, $form_state);
 
   $maps = ctools_export_crud_load_all('leaflet_maps');
   $options = array('' => 'Dont attach');
   foreach ($maps as $machine_name => $data) {
-    $map = leaflet_object_load('Map', $machine_name);
+    $map = \Drupal\leaflet\Leaflet::load('Map', $machine_name);
     if (property_exists($map, 'disabled') && ($map->disabled == 1 || $map->disabled == TRUE)) {
       continue;
     }
@@ -99,7 +99,7 @@ function leaflet_control_form_start($form, &$form_state) {
  * Control base config form validation handler.
  */
 function leaflet_control_form_start_validate($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\LeafletControls();
+  $class = new Drupal\leaflet_ui\UI\LeafletControls();
   $class->init($form_state['plugin']);
   $class->edit_form_validate($form, $form_state);
 }
@@ -108,7 +108,7 @@ function leaflet_control_form_start_validate($form, &$form_state) {
  * Control base config form submit handler.
  */
 function leaflet_control_form_start_submit($form, &$form_state) {
-  $class = new Drupal\leaflet\UI\LeafletControls();
+  $class = new Drupal\leaflet_ui\UI\LeafletControls();
   $class->init($form_state['plugin']);
   $class->edit_form_submit($form, $form_state);
 
@@ -128,7 +128,7 @@ function leaflet_control_form_type($form, &$form_state) {
     '#title' => t('Control Type'),
     '#default_value' => isset($form_state['item']->factory_service) ? $form_state['item']->factory_service : '',
     '#description' => t('Select the type of control.'),
-    '#options' => Leaflet::getLeafletObjectsOptions('Control'),
+    '#options' => \Drupal\leaflet\Leaflet::getLeafletObjectsOptions('Control'),
     '#required' => TRUE,
   );
 
@@ -146,7 +146,7 @@ function leaflet_control_form_type_submit($form, &$form_state) {
  * Control options config form handler.
  */
 function leaflet_control_form_options($form, &$form_state) {
-  $control = leaflet_object_load('Control', $form_state['item']);
+  $control = \Drupal\leaflet\Leaflet::load('Control', $form_state['item']);
   $control->optionsForm($form, $form_state);
   $form['options']['#tree'] = TRUE;
 
@@ -157,7 +157,7 @@ function leaflet_control_form_options($form, &$form_state) {
  * Control options config form validation handler.
  */
 function leaflet_control_form_options_validate($form, &$form_state) {
-  $control = leaflet_object_load('Control', $form_state['item']);
+  $control = \Drupal\leaflet\Leaflet::load('Control', $form_state['item']);
   $control->optionsFormValidate($form, $form_state);
 }
 
@@ -168,6 +168,6 @@ function leaflet_control_form_options_submit($form, &$form_state) {
   if (isset($form_state['values']['options'])) {
     $form_state['item']->options = array_merge((array) $form_state['item']->options, (array) $form_state['values']['options']);
   }
-  $control = leaflet_object_load('Control', $form_state['item']);
+  $control = \Drupal\leaflet\Leaflet::load('Control', $form_state['item']);
   $control->optionsFormSubmit($form, $form_state);
 }

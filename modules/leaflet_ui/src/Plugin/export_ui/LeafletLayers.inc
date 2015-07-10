@@ -127,7 +127,7 @@ function leaflet_layer_form_type($form, &$form_state) {
     '#empty_option' => t('- Select a @plugin type -', array('@plugin' => 'Layer')),
     '#default_value' => isset($form_state['item']->factory_service) ? $form_state['item']->factory_service : '',
     '#description' => t('Select the type of layer.'),
-    '#options' => \Drupal\leaflet\Leaflet::getOLObjectsOptions('Layer'),
+    '#options' => \Drupal\leaflet\Leaflet::getLeafletObjectsOptions('Layer'),
     '#required' => TRUE,
   );
 

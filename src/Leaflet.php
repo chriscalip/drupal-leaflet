@@ -23,7 +23,7 @@ class Leaflet {
    * @return array
    *   Leaflet objects types options.
    */
-  public static function getOLObjectsOptions($object_type) {
+  public static function getLeafletObjectsOptions($object_type) {
     $options = array();
     $service_basename = 'leaflet.' . $object_type;
     foreach (\Drupal::service($service_basename)->getDefinitions() as $service => $data) {

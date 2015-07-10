@@ -4,11 +4,11 @@
  * Class Controls.
  */
 
-namespace Drupal\leaflet\UI;
+namespace Drupal\leaflet_ui\UI;
 
 /**
  * Class Controls.
- * @package Drupal\leaflet\UI
+ * @package Drupal\leaflet_ui\UI
  */
 class LeafletControls extends \LeafletObjects {
 
