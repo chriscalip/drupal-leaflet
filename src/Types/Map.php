@@ -111,6 +111,7 @@ abstract class Map extends Object implements MapInterface {
         '#value' => '',
         '#attributes' => array(
           'id' => $map->getId(),
+          'style' => $css_styles,
           'class' => array(
             'leaflet-map',
             $map->machine_name,
