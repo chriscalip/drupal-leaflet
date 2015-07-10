@@ -245,8 +245,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
     $configuration = $this->getConfiguration();
     $options = $this->getOptions();
 
-    $options = array_map_recursive('_floatval_if_numeric', $options);
-    $options = removeEmptyElements($options);
+    $options = \Drupal\leaflet\Leaflet::array_map_recursive(array('\Drupal\leaflet\Leaflet', 'floatval_if_numeric'), $options);
+    $options = \Drupal\leaflet\Leaflet::removeEmptyElements($options);
     $configuration['options'] = $options;
 
     return (object) $configuration;
