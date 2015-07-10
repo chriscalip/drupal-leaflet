@@ -33,7 +33,8 @@ function leaflet_examples_default_leaflet_maps() {
       0 => 'leaflet_tilelayer_osm',
     ),
     'controls' => array(
-      0 => 'leaflet_control_zoom'
+      0 => 'leaflet_control_zoom',
+      1 => 'leaflet_control_scale'
     )
   );
   $export['leaflet_map_view_edit_form'] = $leaflet_map;
@@ -61,7 +62,8 @@ function leaflet_examples_default_leaflet_maps() {
       0 => 'leaflet_examples_tilelayer_osm_fr',
     ),
     'controls' => array(
-      0 => 'leaflet_control_zoom'
+      0 => 'leaflet_control_zoom',
+      1 => 'leaflet_control_scale'
     )
   );
   $export['leaflet_examples_map_osm_fr'] = $leaflet_map;
@@ -89,7 +91,8 @@ function leaflet_examples_default_leaflet_maps() {
       0 => 'leaflet_examples_tilelayer_osm_de',
     ),
     'controls' => array(
-      0 => 'leaflet_control_zoom'
+      0 => 'leaflet_control_zoom',
+      1 => 'leaflet_control_scale'
     )
   );
   $export['leaflet_examples_map_osm_de'] = $leaflet_map;

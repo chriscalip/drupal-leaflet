@@ -34,7 +34,8 @@ function leaflet_ui_default_leaflet_maps() {
       0 => 'leaflet_tilelayer_default',
     ),
     'controls' => array(
-      0 => 'leaflet_control_zoom'
+      0 => 'leaflet_control_zoom',
+      1 => 'leaflet_control_scale'
     )
   );
   $export['leaflet_map_ui_default'] = $leaflet_map;
@@ -62,7 +63,8 @@ function leaflet_ui_default_leaflet_maps() {
       0 => 'leaflet_tilelayer_default',
     ),
     'controls' => array(
-      0 => 'leaflet_control_zoom'
+      0 => 'leaflet_control_zoom',
+      1 => 'leaflet_control_scale'
     )
   );
   $export['leaflet_map_view_edit_form'] = $leaflet_map;
