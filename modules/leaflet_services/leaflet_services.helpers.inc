@@ -5,7 +5,7 @@
  */
 
 function _leaflet_services_retrieve($name) {
-  $map = leaflet_object_load('Map', check_plain($name));
+  $map = \Drupal\leaflet\Leaflet::load('Map', check_plain($name));
   $build = $map->build();
   $render = drupal_render($build);
   $js = drupal_get_js();
@@ -19,6 +19,6 @@ function _leaflet_services_retrieve($name) {
 }
 
 function _leaflet_services_access($operation, $map) {
-  $map = leaflet_object_load('Map', check_plain($map[0]));
+  $map = \Drupal\leaflet\Leaflet::load('Map', check_plain($map[0]));
   return (bool) $map->getOption('provideIframe', FALSE);
 }

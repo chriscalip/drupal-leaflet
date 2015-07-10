@@ -63,7 +63,7 @@ function leaflet_services_theme($existing, $type, $theme, $path) {
 }
 
 function leaflet_services_form_leaflet_map_form_settings_alter(&$form, &$form_state) {
-  $map = leaflet_object_load('map', $form_state['item']);
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
 
   $form['options']['ui']['provideIframe'] = array(
     '#type' => 'checkbox',
@@ -75,7 +75,7 @@ function leaflet_services_form_leaflet_map_form_settings_alter(&$form, &$form_st
 }
 
 function leaflet_services_form_leaflet_map_form_preview_alter(&$form, &$form_state) {
-  $map = leaflet_object_load('map', $form_state['item']);
+  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
 
   if ((bool) $map->getOption('provideIframe', FALSE) == FALSE) {
     return;
