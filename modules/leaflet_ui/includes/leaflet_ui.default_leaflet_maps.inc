@@ -65,6 +65,9 @@ function leaflet_ui_default_leaflet_maps() {
     'controls' => array(
       0 => 'leaflet_control_zoom',
       1 => 'leaflet_control_scale'
+    ),
+    'components' => array(
+      0 => 'leaflet_component_map_edit_form_values'
     )
   );
   $export['leaflet_map_view_edit_form'] = $leaflet_map;

@@ -86,6 +86,25 @@ class LMap extends Map {
       '#title' => 'Max zoom',
       '#default_value' => $this->getOption(array('view', 'maxZoom'), 0),
     );
+    $form['options']['view']['limit_extent'] = array(
+      '#type' => 'select',
+      '#title' => t('Limit to extent'),
+      '#empty_option' => t('Disabled'),
+      '#empty_value' => '',
+      '#options' => array('custom' => 'Custom extent', 'projection' => 'Map projection'),
+      '#description' => t('If enabled navigation on the map is limited to the give extent.'),
+      '#default_value' => $this->getOption(array('view', 'limit_extent'), FALSE),
+    );
+    $form['options']['view']['extent'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Extent [minx, miny, maxx, maxy]'),
+      '#default_value' => $this->getOption(array('view', 'extent'), ''),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="options[view][limit_extent]"]' => array('value' => 'custom'),
+        ),
+      ),
+    );
   }
 
   /**

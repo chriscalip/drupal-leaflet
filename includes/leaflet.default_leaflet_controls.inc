@@ -1,11 +1,11 @@
 <?php
 /**
  * @file
- * Provide default layers.
+ * Provide default controls.
  */
 
 /**
- * Implements hook_default_layers().
+ * Implements hook_default_controls().
  */
 function leaflet_default_leaflet_controls() {
   $export = array();
