@@ -347,11 +347,9 @@ abstract class Object extends PluginBase implements ObjectInterface {
     $parents = array();
 
     foreach (Leaflet::loadAll('Map') as $map) {
-      if (is_object($map)) {
-        foreach ($map->getCollection()->getFlatList() as $object) {
-          if ($object->machine_name == $this->machine_name) {
-            $parents[$map->machine_name] = $map;
-          }
+      foreach ($map->getObjects($this->getType()) as $object) {
+        if ($object->machine_name == $this->machine_name) {
+          $parents[$map->machine_name] = $map;
         }
       }
     }
