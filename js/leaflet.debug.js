@@ -16,14 +16,6 @@
     console.timeEnd('Building map');
     console.groupEnd();
   });
-  $(document).on('leaflet.sources_pre_alter', function(event, objects) {
-    console.groupCollapsed("Building sources...");
-    console.time('Building sources');
-  });
-  $(document).on('leaflet.sources_post_alter', function(event, objects) {
-    console.timeEnd('Building sources');
-    console.groupEnd();
-  });
 
   $(document).on('leaflet.controls_pre_alter', function(event, objects) {
     console.groupCollapsed("Building controls...");
@@ -31,24 +23,6 @@
   });
   $(document).on('leaflet.controls_post_alter', function(event, objects) {
     console.timeEnd('Building controls');
-    console.groupEnd();
-  });
-
-  $(document).on('leaflet.interactions_pre_alter', function(event, objects) {
-    console.groupCollapsed("Building interactions...");
-    console.time('Building interactions');
-  });
-  $(document).on('leaflet.interactions_post_alter', function(event, objects) {
-    console.timeEnd('Building interactions');
-    console.groupEnd();
-  });
-
-  $(document).on('leaflet.styles_pre_alter', function(event, objects) {
-    console.groupCollapsed("Building styles...");
-    console.time('Building styles');
-  });
-  $(document).on('leaflet.styles_post_alter', function(event, objects) {
-    console.timeEnd('Building styles');
     console.groupEnd();
   });
 

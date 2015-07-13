@@ -119,7 +119,7 @@ Drupal.leaflet = (function($){
       }
       // Prepare instances cache.
       if (typeof Drupal.leaflet.instances[map_id] === 'undefined') {
-        Drupal.leaflet.instances[map_id] = {map:null, layers:{}, styles:{}, controls:{}, interactions:{}, sources:{}, projections:{}, components:{}};
+        Drupal.leaflet.instances[map_id] = {map:null, layers:{}, controls:{}, components:{}};
       }
 
       // Check if we've already an instance of this object for this map.

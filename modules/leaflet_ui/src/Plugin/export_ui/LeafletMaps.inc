@@ -176,7 +176,6 @@ function leaflet_map_form_layers($form, &$form_state) {
         'weight' => $i++,
         'enabled' => isset($layer->enabled) ? $layer->enabled : 0,
         'default' => 1,
-        'style' => isset($layer->options['style']) ? $layer->options['style'] : NULL
       );
     }
   }
@@ -200,15 +199,20 @@ function leaflet_map_form_layers($form, &$form_state) {
           )),
         array(
           'data' => array(
+            '#type' => 'hidden',
+            '#default_value' => $entry['machine_name'],
+            '#parents' => array('layers', $id, 'machine_name'),
+          )),
+        array(
+          'data' => array(
             '#type' => 'checkbox',
             '#title' => t('Enable'),
             '#title_display' => 'invisible',
-            '#default_value' => $entry['enable'],
-            '#parents' => array('layers', $id, 'enable'),
+            '#default_value' => $entry['enabled'],
+            '#parents' => array('layers', $id, 'enabled'),
           )),
         check_plain($entry['name']),
         check_plain($entry['machine_name']),
-        check_plain($entry['description']),
         check_plain($entry['factory_service']),
         l(t('Edit'), 'admin/structure/leaflet/layers/list/' . $entry['machine_name'] . '/edit/options',
           array(
@@ -220,12 +224,12 @@ function leaflet_map_form_layers($form, &$form_state) {
       ),
       'class' => array('draggable'),
     );
+
     // Build rows of the form elements in the table.
     $row_elements[$id] = array(
       'weight' => &$rows[$id]['data'][1]['data'],
       'enabled' => &$rows[$id]['data'][2]['data'],
-      'style' => &$rows[$id]['data'][3]['data'],
-      'machine_name' => &$rows[$id]['data'][4]['data'],
+      'machine_name' => &$rows[$id]['data'][3]['data'],
     );
   }
 
@@ -245,11 +249,9 @@ function leaflet_map_form_layers($form, &$form_state) {
     '#header' => array(
       // We need two empty columns for the weigth field and the cross.
       array('data' => NULL, 'colspan' => 2),
-      t('Enabled'),
-      array('data' => t('Style'), 'colspan' => 1),
+      array('data' => t('Enabled'), 'colspan' => 2),
       t('Name'),
       t('Machine name'),
-      t('Description'),
       t('Factory service'),
       t('Operations'),
     ),
@@ -271,24 +273,6 @@ function leaflet_map_form_layers_submit($form, &$form_state) {
   $layers_enabled = array_filter($form_state['values']['layers'], function($item) {
     return (bool) $item['enabled'];
   });
-
-  foreach ($layers_enabled as $id => $data) {
-    //Update the layer style.
-    if (($layer = \Drupal\leaflet\Leaflet::load('layer', $data['machine_name'])) == TRUE) {
-      if (!empty($data['style'])) {
-        $layer_style = $layer->getStyle();
-        if (!$layer_style || ($data['style'] != $layer_style->machine_name)) {
-          $style = \Drupal\leaflet\Leaflet::load('style', $data['style']);
-          $layer->setStyle($style);
-        }
-      }
-      else {
-        $layer->clearOption('style');
-        $layer->getCollection()->clear(array('style'));
-      }
-      \Drupal\leaflet\Leaflet::save($layer);
-    }
-  }
 
   $map->getCollection()->clear(array('layer'));
   foreach($layers_enabled as $layer => $data) {
@@ -553,71 +537,6 @@ function leaflet_map_form_components_submit($form, &$form_state) {
     $component = \Drupal\leaflet\Leaflet::load('component', $component);
     $component->setWeight($data['weight']);
     $map->getCollection()->append($component);
-  }
-
-  $form_state['item'] = $map->getExport();
-}
-
-/**
- * Map styles config form handler.
- */
-function leaflet_map_form_styles($form, &$form_state) {
-  $all_styles = \Drupal\leaflet\Leaflet::loadAllExportable('Style');
-
-  $header = array(
-    'name' => t('Name'),
-    'machine_name' => t('Machine name'),
-    'description' => t('Description'),
-    'operations' => t('Operations'),
-  );
-
-  $rows = array();
-  foreach ($all_styles as $machine_name => $style) {
-    if (is_object($style)) {
-      $rows[$machine_name] = array(
-        'name' => $style->name,
-        'machine_name' => $style->machine_name,
-        'description' => $style->description,
-        'operations' => l(
-          t('Edit'),
-          'admin/structure/leaflet/styles/list/' . $machine_name . '/edit/options',
-          array(
-            'query' => array(
-              'destination' => current_path(),
-            ),
-          )
-        ),
-      );
-    }
-  }
-
-  $form['options']['#tree'] = TRUE;
-
-  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
-  $export = $map->getExport();
-
-  $form['options']['styles'] = array(
-    '#type' => 'tableselect',
-    '#header' => $header,
-    '#options' => $rows,
-    '#default_value' => isset($export->options['styles']) ? drupal_map_assoc($export->options['styles']) : array(),
-  );
-
-  return $form;
-}
-
-/**
- * Map styles config form submit handler.
- */
-function leaflet_map_form_styles_submit($form, &$form_state) {
-  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
-
-  $styles_enabled = array_filter($form_state['values']['options']['styles']);
-
-  $map->getCollection()->clear(array('style'));
-  foreach ($styles_enabled as $style => $data) {
-    $style = \Drupal\leaflet\Leaflet::load('style', $style);
-    $map->getCollection()->append($style);
   }
 
   $form_state['item'] = $map->getExport();

@@ -21,6 +21,12 @@ class TileLayer extends Layer {
    * {@inheritdoc}
    */
   public function optionsForm(&$form, &$form_state) {
+    $form['options']['url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('URL'),
+      '#default_value' => $this->getOption('url', 1),
+      '#description' => t(''),
+    );
     $form['options']['minZoom'] = array(
       '#type' => 'textfield',
       '#title' => t('minZoom'),

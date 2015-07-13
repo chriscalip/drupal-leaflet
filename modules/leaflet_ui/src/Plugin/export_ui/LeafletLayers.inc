@@ -131,20 +131,6 @@ function leaflet_layer_form_type($form, &$form_state) {
     '#required' => TRUE,
   );
 
-  $form['options'] = array(
-    '#tree' => TRUE,
-  );
-
-  $form['options']['source'] = array(
-    '#type' => 'select',
-    '#title' => t('Source'),
-    '#empty_option' => t('- Select a Source -'),
-    '#default_value' => isset($form_state['item']->options['source']) ? $form_state['item']->options['source'] : '',
-    '#description' => t('Select the source.'),
-    '#options' => \Drupal\leaflet\Leaflet::loadAllAsOptions('Source'),
-    '#required' => TRUE,
-  );
-
   $form['options']['visible'] = array(
     '#type' => 'checkbox',
     '#title' => t('Visible ?'),
