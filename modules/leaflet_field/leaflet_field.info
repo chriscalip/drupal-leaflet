@@ -1,0 +1,6 @@
+name = Leaflet Field
+description = Provides an Leaflet field to display a map in your entities.
+core = 7.x
+package = "Leaflet"
+
+dependencies[] = leaflet
