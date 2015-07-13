@@ -15,7 +15,7 @@ function leaflet_ui_LeafletLayers_ctools_export_ui() {
       'menu prefix' => 'admin/structure/leaflet',
       'menu item' => 'layers',
       'menu title' => 'Layers',
-      'menu description' => 'Administer OpenLayers layers presets.',
+      'menu description' => 'Administer Leaflet layers presets.',
     ),
 
     'handler' => array(
@@ -55,8 +55,8 @@ function leaflet_ui_LeafletLayers_ctools_export_ui() {
 
     'title singular' => t('layer'),
     'title plural' => t('layers'),
-    'title singular proper' => t('OpenLayers preset'),
-    'title plural proper' => t('OpenLayers Layers presets'),
+    'title singular proper' => t('Leaflet preset'),
+    'title plural proper' => t('Leaflet Layers presets'),
 
     'strings' => array(
       'confirmation' => array(
