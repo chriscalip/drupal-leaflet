@@ -112,7 +112,7 @@ function leaflet_map_form_start_submit($form, &$form_state) {
  */
 function leaflet_map_form_settings($form, &$form_state) {
   if (!isset($form_state['item']->factory_service)) {
-    $form_state['item']->factory_service = 'leaflet.Map:OLMap';
+    $form_state['item']->factory_service = 'leaflet.Map:LMap';
   }
   if (($map = \Drupal\leaflet\Leaflet::load('Map', $form_state['item'])) == TRUE) {
     $map->optionsForm($form, $form_state);
@@ -137,7 +137,7 @@ function leaflet_map_form_settings_submit($form, &$form_state) {
   $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
 
   if (empty($map->factory_service)) {
-    $map->factory_service = 'leaflet.Map:OLMap';
+    $map->factory_service = 'leaflet.Map:LMap';
   }
 
   $map->optionsFormSubmit($form, $form_state);
@@ -274,12 +274,7 @@ function leaflet_map_form_layers_submit($form, &$form_state) {
     return (bool) $item['enabled'];
   });
 
-  $map->getCollection()->clear(array('layer'));
-  foreach($layers_enabled as $layer => $data) {
-    $layer = \Drupal\leaflet\Leaflet::load('layer', $layer);
-    $layer->setWeight($data['weight']);
-    $map->getCollection()->merge($layer->getCollection());
-  }
+  $map->setOption('layers', array_keys($layers_enabled));
 
   $form_state['item'] = $map->getExport();
 }
@@ -406,12 +401,7 @@ function leaflet_map_form_controls_submit($form, &$form_state) {
     return (bool) $item['enabled'];
   });
 
-  $map->getCollection()->clear(array('control'));
-  foreach($controls_enabled as $control => $data) {
-    $control = \Drupal\leaflet\Leaflet::load('control', $control);
-    $control->setWeight($data['weight']);
-    $map->getCollection()->append($control);
-  }
+  $map->setOption('controls', array_keys($controls_enabled));
 
   $form_state['item'] = $map->getExport();
 }
@@ -532,12 +522,7 @@ function leaflet_map_form_components_submit($form, &$form_state) {
     return (bool) $item['enabled'];
   });
 
-  $map->getCollection()->clear(array('component'));
-  foreach ($components_enabled as $component => $data) {
-    $component = \Drupal\leaflet\Leaflet::load('component', $component);
-    $component->setWeight($data['weight']);
-    $map->getCollection()->append($component);
-  }
+  $map->setOption('components', array_keys($components_enabled));
 
   $form_state['item'] = $map->getExport();
 }
