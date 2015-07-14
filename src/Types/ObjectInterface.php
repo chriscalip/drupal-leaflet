@@ -216,15 +216,6 @@ interface ObjectInterface extends PluginInspectionInterface {
   public function getClassPath();
 
   /**
-   * Fill in the Collection object from the object's options.
-   * Allows to adjust the initially built collection.
-   * The collection can be accessed already by calling $this->getCollection().
-   *
-   * @return void
-   */
-  public function buildCollection();
-
-  /**
    * Return the Collection object linked to the object.
    *
    * @return Collection
@@ -252,4 +243,11 @@ interface ObjectInterface extends PluginInspectionInterface {
    * @return int
    */
   public function getWeight();
+
+  /**
+   * Return a flat array containing leaflet Objects from the options array.
+   *
+   * @return Object[]
+   */
+  public function optionsToObjects();
 }

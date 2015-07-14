@@ -12,25 +12,16 @@ use Drupal\leaflet\Leaflet;
  */
 abstract class Map extends Object implements MapInterface {
   /**
+   * The array containing the options.
+   *
+   * @var array
+   */
+  protected $options = array();
+
+  /**
    * @var string
    */
   protected $id;
-
-  /**
-   * {@inheritdoc}
-   */
-  public function init() {
-    parent::init();
-
-    foreach (Leaflet::getPluginTypes(array('map')) as $type) {
-      foreach ($this->getOption($type . 's', array()) as $weight => $object) {
-        if ($merge_object = Leaflet::load($type, $object)) {
-          $merge_object->setWeight($weight);
-          $this->getCollection()->merge($merge_object->getCollection());
-        }
-      }
-    }
-  }
 
   /**
    * {@inheritdoc}
@@ -129,28 +120,6 @@ abstract class Map extends Object implements MapInterface {
     $map->postBuild($build, $map);
 
     return $build;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getOptions() {
-    $export = array_change_key_case($this->getCollection()->getExport(), CASE_LOWER);
-    $options = isset($this->options) ? $this->options : array();
-
-    unset($export['map']);
-
-    // Synchronize this item's options with its the Collection.
-    foreach(Leaflet::getPluginTypes(array('map')) as $type) {
-      $option = drupal_strtolower($type) . 's';
-      if (isset($export[$type])) {
-        $options[$option] = $export[$type];
-      }
-    }
-
-    $this->options = $options;
-
-    return $this->options;
   }
 
   /**

@@ -6,15 +6,16 @@
 
 namespace Drupal\leaflet\Types;
 
-use Drupal\leaflet\Component\Annotation\LeafletPlugin;
+use Drupal\leaflet\Component\Annotation\leafletPlugin;
 use Drupal\Component\Plugin\PluginBase;
+use Drupal\leaflet\leaflet;
 use Drupal\leaflet\Types\Object;
 
 
 /**
  * Class Collection.
  *
- * @LeafletPlugin(
+ * @leafletPlugin(
  *   id = "Collection"
  * )
  */
@@ -26,6 +27,18 @@ class Collection extends PluginBase {
    * \Drupal\leaflet\Types\Object.
    */
   protected $objects = array();
+
+  /**
+   * Import a flat list of leaflet Objects.
+   *
+   * @param array ObjectInterface[]
+   */
+  public function import(array $import = array()) {
+    foreach ($import as $object) {
+      /* @var Object $object */
+      $this->merge($object->getCollection());
+    }
+  }
 
   /**
    * Add object to this collection.

@@ -114,7 +114,7 @@ class Leaflet {
       $configuration = $array_object->getArrayCopy();
     }
     if (is_object($export) && ($export instanceof ObjectInterface)) {
-      $configuration = $export->getConfiguration();
+      return $export;
     }
     if (is_string($export)) {
       $configuration = (array) Leaflet::loadExportable($object_type, $export);
