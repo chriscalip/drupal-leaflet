@@ -37,7 +37,7 @@ function leaflet_services_default_services_endpoint() {
     ),
   );
   $endpoint->resources = array(
-    'leaflet_map' => array(
+    'leaflet-map' => array(
       'operations' => array(
         'retrieve' => array(
           'enabled' => '1',
@@ -46,7 +46,7 @@ function leaflet_services_default_services_endpoint() {
     ),
   );
   $endpoint->debug = 0;
-  $export['leaflet_map'] = $endpoint;
+  $export['leaflet-map'] = $endpoint;
 
   return $export;
 }

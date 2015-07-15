@@ -5,20 +5,21 @@
  */
 
 function _leaflet_services_retrieve($name) {
-  $map = \Drupal\leaflet\Leaflet::load('Map', check_plain($name));
-  $build = $map->build();
-  $render = drupal_render($build);
-  $js = drupal_get_js();
-  $styles = drupal_get_css();
+  if (($map = \Drupal\leaflet\Leaflet::load('Map', $name)) == TRUE) {
+    $build = $map->build();
+    $render = drupal_render($build);
+    $js = drupal_get_js();
+    $styles = drupal_get_css();
 
-  return theme('leaflet_map_iframe', array(
-    'page' => $render,
-    'scripts' => $js,
-    'styles' => $styles,
-  ));
+    return theme('leaflet_map_iframe', array(
+      'page' => $render,
+      'scripts' => $js,
+      'styles' => $styles,
+    ));
+  }
 }
 
 function _leaflet_services_access($operation, $map) {
-  $map = \Drupal\leaflet\Leaflet::load('Map', check_plain($map[0]));
-  return (bool) $map->getOption('provideIframe', FALSE);
+  $map = \Drupal\leaflet\Leaflet::load('Map', $map[0]);
+  return $map == TRUE && (bool) $map->getOption('provideIframe', FALSE);
 }

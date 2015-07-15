@@ -3,6 +3,7 @@
  * @file
  * Leaflet Services module.
  */
+
 include 'leaflet_services.helpers.inc';
 
 /**
@@ -19,9 +20,9 @@ function leaflet_services_ctools_plugin_api($owner, $api) {
  */
 function leaflet_services_services_resources() {
   return array(
-    'leaflet_map' => array(
+    'leaflet-map' => array(
       'retrieve' => array(
-        'help' => 'Retrieves a Leaflet map',
+        'help' => 'Retrieves an Leaflet map',
         'file' => array(
           'type' => 'inc',
           'module' => 'leaflet_services',
@@ -63,21 +64,22 @@ function leaflet_services_theme($existing, $type, $theme, $path) {
 }
 
 function leaflet_services_form_leaflet_map_form_settings_alter(&$form, &$form_state) {
-  $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
+  if (($map = \Drupal\leaflet\Leaflet::load('map', $form_state['item'])) == TRUE) {
 
-  $form['options']['ui']['provideIframe'] = array(
-    '#type' => 'checkbox',
-    '#title' => 'Provide iframe of this map ?',
-    '#description' => t('Enable this to provide this map as an iframe through the service module.'),
-    '#default_value' => $map->getOption('provideIframe', FALSE),
-    '#parents' => array('options', 'provideIframe'),
-  );
+    $form['options']['ui']['provideIframe'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Provide iframe of this map ?',
+      '#description' => t('Enable this to provide this map as an iframe through the service module.'),
+      '#default_value' => $map->getOption('provideIframe', FALSE),
+      '#parents' => array('options', 'provideIframe'),
+    );
+  }
 }
 
 function leaflet_services_form_leaflet_map_form_preview_alter(&$form, &$form_state) {
   $map = \Drupal\leaflet\Leaflet::load('map', $form_state['item']);
 
-  if ((bool) $map->getOption('provideIframe', FALSE) == FALSE) {
+  if ($map == FALSE || (bool) $map->getOption('provideIframe', FALSE) == FALSE) {
     return;
   }
 
@@ -89,18 +91,18 @@ function leaflet_services_form_leaflet_map_form_preview_alter(&$form, &$form_sta
   );
 
   foreach (services_endpoint_load_all() as $service) {
-    if (isset($service->resources['leaflet']['operations']['retrieve']['enabled']) && $service->resources['leaflet']['operations']['retrieve']['enabled'] == 1) {
+    if (isset($service->resources['leaflet-map']['operations']['retrieve']['enabled']) && $service->resources['leaflet-map']['operations']['retrieve']['enabled'] == 1) {
 
       $width = ($map->getOption('width', 'auto') == 'auto') ? '100%' : $map->getOption('width', 'auto');
       $height = $map->getOption('height', 'auto');
-      $iframe = "<iframe src='" . url('map/leaflet/' . $map->machine_name, array('absolute' => TRUE)) . "' width='" . $width . "' height='" . $height . "'/>";
+      $iframe = "<iframe src='" . url('leaflet/leaflet-map/' . $map->machine_name, array('absolute' => TRUE)) . "' width='" . $width . "' height='" . $height . "'/>";
 
       $form['leaflet_services'][$map->machine_name] = array(
         '#type' => 'textarea',
         '#description' => t('Copy paste this html code to embed this map in your content.'),
         '#rows' => 3,
         '#value' => $iframe,
-        '#disabled' => TRUE,
+        '#disabled' => FALSE,
       );
     }
   }
