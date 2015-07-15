@@ -267,7 +267,7 @@ class Leaflet {
    */
   public static function floatval_if_numeric($var) {
     if (is_numeric($var)) {
-      return is_float($var) ? floatval($var) : intval($var);
+      return is_float($var + 0) ? floatval($var) : intval($var);
     }
     return $var;
   }
