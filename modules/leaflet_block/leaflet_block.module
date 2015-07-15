@@ -4,14 +4,10 @@
  * Implements hook_block_info().
  */
 function leaflet_block_block_info() {
-  ctools_include('export');
-  $all_maps = ctools_export_crud_load_all('leaflet_maps');
   $blocks = array();
 
-  foreach ($all_maps as $map) {
-    $map = leaflet_object_load('Map', $map);
-    // @todo: why does this fail when doing drush cc all ?
-    if ($map->getOption('provideBlock', FALSE)) {
+  foreach (\Drupal\leaflet\Leaflet::loadAll('Map') as $map) {
+    if (is_object($map) && $map->getOption('provideBlock', FALSE)) {
       $key = _leaflet_block_get_block_id($map->machine_name);
       $blocks[$key]['info'] = t('Leaflet block for @map_name', array('@map_name' => $map->name));
     }
@@ -27,11 +23,14 @@ function leaflet_block_block_view($delta = '') {
   $block = array();
   $machine_name = _leaflet_block_get_map_name($delta);
 
-  if ($map = leaflet_object_load('Map', $machine_name)) {
-    if ($map->getOption('provideBlock', 1)) {
+  try {
+    if (($map = \Drupal\leaflet\Leaflet::load('Map', $machine_name)) == TRUE && $map->getOption('provideBlock', 1)) {
       $block['subject'] = $map->machine_name;
       $block['content'] = $map->build();
     }
+  }
+  catch (Exception $e) {
+    // Avoids that this takes down the whole page because of a failing map.
   }
 
   return $block;
@@ -60,11 +59,8 @@ function _leaflet_block_get_block_id($map_machine_name) {
  *   The name of the map.
  */
 function _leaflet_block_get_map_name($delta) {
-  ctools_include('export');
-  $all_maps = ctools_export_crud_load_all('leaflet_maps');
-
-  foreach ($all_maps as $map) {
-    if (_leaflet_block_get_block_id($map->machine_name) == $delta) {
+  foreach (\Drupal\leaflet\Leaflet::loadAllExportable('Map') as $map) {
+    if (is_object($map) && _leaflet_block_get_block_id($map->machine_name) == $delta) {
       return $map->machine_name;
     }
   }
@@ -72,13 +68,13 @@ function _leaflet_block_get_map_name($delta) {
 }
 
 function leaflet_block_form_leaflet_map_form_settings_alter(&$form, &$form_state) {
-  $map = leaflet_object_load('Map', $form_state['item']);
-
-  $form['options']['ui']['provideBlock'] = array(
-    '#type' => 'checkbox',
-    '#title' => 'Provide Drupal block for this map ?',
-    '#description' => t('Enable this to provide a Drupal block for this map.'),
-    '#default_value' => $map->getOption('provideBlock', FALSE),
-    '#parents' => array('options', 'provideBlock'),
-  );
+  if (($map = \Drupal\leaflet\Leaflet::load('Map', $form_state['item'])) == TRUE) {
+    $form['options']['ui']['provideBlock'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Provide Drupal block for this map ?',
+      '#description' => t('Enable this to provide a Drupal block for this map.'),
+      '#default_value' => $map->getOption('provideBlock', FALSE),
+      '#parents' => array('options', 'provideBlock'),
+    );
+  }
 }
