@@ -401,7 +401,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
     if (is_null($this->collection) || !($this->collection instanceof Collection)) {
       $this->collection = \Drupal::service('leaflet.Types')->createInstance('Collection');
       $this->collection->import($this->optionsToObjects());
-      $this->getCollection()->append($this);
+      $this->collection->append($this);
     }
     return $this->collection;
   }
@@ -410,18 +410,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
    * {@inheritdoc}
    */
   public function optionsToObjects() {
-    $import = array();
-
-    foreach (leaflet::getPluginTypes() as $type) {
-      foreach ($this->getOption($type . 's', array()) as $weight => $object) {
-        if ($merge_object = leaflet::load($type, $object)) {
-          $merge_object->setWeight($weight);
-          $import[] = $merge_object;
-        }
-      }
-    }
-
-    return $import;
+    return array();
   }
 
   /**

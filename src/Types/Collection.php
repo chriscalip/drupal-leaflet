@@ -6,16 +6,16 @@
 
 namespace Drupal\leaflet\Types;
 
-use Drupal\leaflet\Component\Annotation\leafletPlugin;
+use Drupal\leaflet\Component\Annotation\LeafletPlugin;
 use Drupal\Component\Plugin\PluginBase;
-use Drupal\leaflet\leaflet;
+use Drupal\leaflet\Leaflet;
 use Drupal\leaflet\Types\Object;
 
 
 /**
  * Class Collection.
  *
- * @leafletPlugin(
+ * @LeafletPlugin(
  *   id = "Collection"
  * )
  */
@@ -29,7 +29,7 @@ class Collection extends PluginBase {
   protected $objects = array();
 
   /**
-   * Import a flat list of leaflet Objects.
+   * Import a flat list of Leaflet Objects.
    *
    * @param array ObjectInterface[]
    */
@@ -47,14 +47,19 @@ class Collection extends PluginBase {
    *   Object instance to add to this collection.
    */
   public function append(ObjectInterface $object) {
-    $type = drupal_strtolower($object->getType());
     $this->delete($object);
-    $this->objects[$type][$object->machine_name] = $object;
+    $this->objects[] = $object;
+  }
 
-    // If the dependency system is working, we don't need this.
-    uasort($this->objects[$type], function($a, $b) {
-      return $a->getWeight() - $b->getWeight();
-    });
+  /**
+   * Add object to this collection.
+   *
+   * @param ObjectInterface $object
+   *   Object instance to add to this collection.
+   */
+  public function prepend(ObjectInterface $object) {
+    $this->delete($object);
+    array_unshift($this->objects, $object);
   }
 
   /**
@@ -139,16 +144,14 @@ class Collection extends PluginBase {
    */
   public function getObjects($type = NULL) {
     if ($type == NULL) {
-      return $this->objects;
+      $list = array();
+      foreach ($this->getFlatList() as $object) {
+        $list[$object->getType()][] = $object;
+      }
+      return array_change_key_case($list, CASE_LOWER);
     }
 
-    $type = drupal_strtolower($type);
-
-    if (isset($this->objects[$type])) {
-      return $this->objects[$type];
-    }
-
-    return array();
+    return $this->getFlatList($type);
   }
 
   /**
@@ -162,20 +165,19 @@ class Collection extends PluginBase {
    *   List of objects of this collection or list of a specific type of objects.
    */
   public function getFlatList($type = NULL) {
-    $list = array();
+    $list = $this->objects;
 
-    if ($type != NULL && isset($this->objects[$type])) {
-      foreach ($this->objects[$type] as $object) {
-        $list[] = $object;
-      }
+    if ($type != NULL) {
+      $type = drupal_strtolower($type);
+      $list = array_filter($this->objects, function($obj) use ($type) {
+        /* @var Object $obj */
+        return drupal_strtolower($obj->getType()) == $type;
+      });
     }
-    else {
-      foreach ($this->objects as $objects) {
-        foreach ($objects as $object) {
-          $list[] = $object;
-        }
-      }
-    }
+
+    uasort($list, function($a, $b) {
+      return $a->getWeight() - $b->getWeight();
+    });
 
     return $list;
   }
@@ -188,7 +190,7 @@ class Collection extends PluginBase {
    */
   public function merge(Collection $collection) {
     foreach ($collection->getFlatList() as $object) {
-      $this->append($object);
+      $this->prepend($object);
     }
   }
 
@@ -202,6 +204,6 @@ class Collection extends PluginBase {
     foreach($this->getFlatList() as $object) {
       $export[$object->getType()][] = $object->machine_name;
     }
-    return $export;
+    return array_change_key_case($export, CASE_LOWER);
   }
 }

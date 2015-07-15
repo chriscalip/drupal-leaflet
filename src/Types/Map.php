@@ -114,12 +114,31 @@ abstract class Map extends Object implements MapInterface {
 
     // If this is an asynchronous map flag it as such.
     if ($asynchronous) {
-      $build['map']['#attributes']['class'][] = 'asynchronous';
+      $build['leaflet']['map']['#attributes']['class'][] = 'asynchronous';
     }
 
     $map->postBuild($build, $map);
 
     return $build;
+  }
+
+
+  /**
+   * {@inheritdoc}
+   */
+  public function optionsToObjects() {
+    $import = array();
+
+    foreach (Leaflet::getPluginTypes(array('map')) as $type) {
+      foreach ($this->getOption($type . 's', array()) as $weight => $object) {
+        if ($merge_object = Leaflet::load($type, $object)) {
+          $merge_object->setWeight($weight);
+          $import[] = $merge_object;
+        }
+      }
+    }
+
+    return $import;
   }
 
   /**
