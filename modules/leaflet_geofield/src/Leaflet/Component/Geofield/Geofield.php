@@ -16,29 +16,6 @@ $plugin = array(
  * Class Geofield.
  */
 class Geofield extends Component {
-
-  /**
-   * {@inheritdoc}
-   */
-  public function defaultProperties() {
-    $defaults = parent::defaultProperties();
-    $defaults['options'] = array(
-      'dataType' => array('GeoJSON'),
-      'dataProjection' => 'EPSG:4326',
-      'typeOfFeature' => array(
-        'Point',
-        'LineString',
-        'Polygon',
-      ),
-      'featureLimit' => 0,
-      'showInputField' => 0,
-      'inputFieldName' => 'geofield',
-      'initialData' => '',
-      'actionFeature' => array('draw' => 'draw', 'modify' => 'modify'),
-    );
-    return $defaults;
-  }
-
   /**
    * {@inheritdoc}
    */

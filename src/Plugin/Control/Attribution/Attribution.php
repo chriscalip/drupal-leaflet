@@ -13,11 +13,11 @@ use Drupal\leaflet\Types\Control;
  * Class Attribution.
  *
  * @LeafletPlugin(
- *  id = "Attribution"
+ *  id = "Attribution",
+ *  description = "Provides an information button with layers information."
  * )
  */
 class Attribution extends Control {
-
   /**
    * {@inheritdoc}
    */

@@ -36,7 +36,21 @@ function leaflet_ui_default_leaflet_maps() {
     'controls' => array(
       0 => 'leaflet_control_zoom',
       1 => 'leaflet_control_scale'
-    )
+    ),
+    'capabilities' => array(
+      'enabled' => 1,
+      'options' => array(
+        'container_type' => 'fieldset',
+        'title' => 'Map capabilities',
+        'description' => '',
+        'collapsible' => 1,
+        'collapsed' => 0,
+        'table' => array(
+          'leaflet_control_scale' => 'A Simple scale control that shows the scale of the current center of screen in metric and imperial system.',
+          'leaflet_control_zoom' => 'A basic zoom control with two buttons.',
+        ),
+      ),
+    ),
   );
   $export['leaflet_map_ui_default'] = $leaflet_map;
 

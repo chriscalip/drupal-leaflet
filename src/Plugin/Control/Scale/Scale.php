@@ -12,7 +12,8 @@ use Drupal\leaflet\Types\Control;
  * Class Scale.
  *
  * @LeafletPlugin(
- *   id = "Scale"
+ *   id = "Scale",
+ *   description = "A Simple scale control that shows the scale of the current center of screen in metric and imperial system."
  * )
  */
 class Scale extends Control {

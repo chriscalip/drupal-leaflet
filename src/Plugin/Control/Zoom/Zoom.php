@@ -12,7 +12,8 @@ use Drupal\leaflet\Types\Control;
  * Class Zoom.
  *
  * @LeafletPlugin(
- *   id = "Zoom"
+ *   id = "Zoom",
+ *   description = "A basic zoom control with two buttons."
  * )
  */
 class Zoom extends Control {

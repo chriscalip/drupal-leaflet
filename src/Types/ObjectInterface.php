@@ -8,17 +8,9 @@ namespace Drupal\leaflet\Types;
 use Drupal\Component\Plugin\PluginInspectionInterface;
 
 /**
- * Interface ObjectInterface.
+ * Interface leaflet_object_interface.
  */
 interface ObjectInterface extends PluginInspectionInterface {
-  /**
-   * Return a list of default properties.
-   *
-   * @return array
-   *   The default properties for this class.
-   */
-  public function defaultProperties();
-
   /**
    * Initializes the object.
    */
@@ -245,9 +237,38 @@ interface ObjectInterface extends PluginInspectionInterface {
   public function getWeight();
 
   /**
-   * Return a flat array containing leaflet Objects from the options array.
+   * Return a flat array containing Leaflet Objects from the options array.
    *
    * @return Object[]
    */
   public function optionsToObjects();
+
+  /**
+   * Return the human name of the object.
+   *
+   * @return string
+   */
+  public function getName();
+
+  /**
+   * Return the unique machine name of the object.
+   *
+   * @return string
+   *   The unique machine name of this object.
+   */
+  public function getMachineName();
+
+  /**
+   * Return the description of the object.
+   *
+   * @return string
+   */
+  public function getDescription();
+
+  /**
+   * Return the description of the object's plugin.
+   *
+   * @return string
+   */
+  public function getPluginDescription();
 }

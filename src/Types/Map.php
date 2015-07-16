@@ -12,13 +12,8 @@ use Drupal\leaflet\Leaflet;
  */
 abstract class Map extends Object implements MapInterface {
   /**
-   * The array containing the options.
+   * A unique ID for the map.
    *
-   * @var array
-   */
-  protected $options = array();
-
-  /**
    * @var string
    */
   protected $id;
@@ -90,16 +85,14 @@ abstract class Map extends Object implements MapInterface {
       '#type' => 'container',
       '#attributes' => array(
         'id' => 'leaflet-container-' . $map->getId(),
-        'style' => $css_styles,
         'class' => array(
           'contextual-links-region',
           'leaflet-container',
         ),
       ),
       'map' => array(
-        '#theme' => 'html_tag',
-        '#tag' => 'div',
-        '#value' => '',
+        '#type' => 'container',
+        '#weight' => 0,
         '#attributes' => array(
           'id' => $map->getId(),
           'style' => $css_styles,
@@ -117,11 +110,41 @@ abstract class Map extends Object implements MapInterface {
       $build['leaflet']['map']['#attributes']['class'][] = 'asynchronous';
     }
 
+    if ((bool) $this->getOption('capabilities', FALSE) === TRUE) {
+      $items = array_values($this->getOption(array('capabilities', 'options', 'table'), array()));
+      array_walk($items, 'check_plain');
+
+      $variables = array(
+        'items' => $items,
+        'title' => '',
+        'type' => 'ul',
+      );
+
+      $build['leaflet']['capabilities'] = array(
+        '#weight' => 1,
+        '#type' => $this->getOption(array('capabilities', 'options', 'container_type'), 'fieldset'),
+        '#title' => $this->getOption(array('capabilities', 'options', 'title'), NULL),
+        '#description' => $this->getOption(array('capabilities', 'options', 'description'), NULL),
+        '#collapsible' => $this->getOption(array('capabilities', 'options', 'collapsible'), TRUE),
+        '#collapsed' => $this->getOption(array('capabilities', 'options', 'collapsed'), TRUE),
+        'description' => array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'class' => array(
+              'description'
+            )
+          ),
+          array(
+            '#markup' => theme('item_list', $variables)
+          )
+        )
+      );
+    }
+
     $map->postBuild($build, $map);
 
     return $build;
   }
-
 
   /**
    * {@inheritdoc}
@@ -147,6 +170,7 @@ abstract class Map extends Object implements MapInterface {
   public function getJS() {
     $js = parent::getJS();
     $js['opt']['target'] = $this->getId();
+    unset($js['opt']['capabilities']);
     return $js;
   }
 }

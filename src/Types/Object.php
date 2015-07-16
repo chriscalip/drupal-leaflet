@@ -7,7 +7,7 @@
 namespace Drupal\leaflet\Types;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\leaflet\Config;
-use Drupal\leaflet\leaflet;
+use Drupal\leaflet\Leaflet;
 use Drupal\leaflet\Types\Collection;
 use Drupal\leaflet\Types\ObjectInterface;
 
@@ -37,15 +37,16 @@ abstract class Object extends PluginBase implements ObjectInterface {
   public $description;
 
   /**
+   * The factory service.
+   *
+   * @var string
+   */
+  public $factory_service;
+
+  /**
    * @var int
    */
   protected $weight = -1;
-
-  /**
-   * @var string
-   */
-  public $factory_service = NULL;
-
   /**
    * The array containing the options.
    *
@@ -73,31 +74,12 @@ abstract class Object extends PluginBase implements ObjectInterface {
   /**
    * {@inheritdoc}
    */
-  public function defaultProperties() {
-    return array(
-      'machine_name' => NULL,
-      'name' => NULL,
-      'description' => NULL,
-      'options' => array(),
-      'factory_service' => NULL,
-    );
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function init() {
-    // Mash the provided configuration with the defaults.
-    foreach ($this->defaultProperties() as $property => $value) {
-      if (isset($this->configuration[$property])) {
-        $this->{$property} = $this->configuration[$property];
-      }
-    }
-
-    // We need to ensure the object has a proper machine name.
-    if (empty($this->machine_name)) {
-      $this->machine_name = drupal_html_id($this->getType() . '-' . time());
-    }
+    $this->options = $this->getOptions();
+    $this->machine_name = $this->getMachineName();
+    $this->name = $this->getName();
+    $this->description = $this->getDescription();
+    $this->factory_service = $this->getFactoryService();
   }
 
   /**
@@ -216,7 +198,16 @@ abstract class Object extends PluginBase implements ObjectInterface {
    * {@inheritdoc}
    */
   public function getOptions() {
-    return $this->options;
+    if (!empty($this->options)) {
+      return $this->options;
+    } else {
+      $configuration = $this->getConfiguration();
+      if (!empty($configuration['options'])) {
+        return $configuration['options'];
+      }
+    }
+
+    return array();
   }
 
   /**
@@ -248,6 +239,38 @@ abstract class Object extends PluginBase implements ObjectInterface {
    */
   public function getConfiguration() {
     return $this->configuration;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMachineName() {
+    $configuration = $this->getConfiguration();
+    return check_plain($configuration['machine_name']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getName() {
+    $configuration = $this->getConfiguration();
+    return check_plain($configuration['name']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getDescription() {
+    $configuration = $this->getConfiguration();
+    return check_plain($configuration['description']);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getFactoryService() {
+    $configuration = $this->getConfiguration();
+    return check_plain($configuration['factory_service']);
   }
 
   /**
@@ -337,7 +360,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
   public function getParents() {
     $parents = array();
 
-    foreach (leaflet::loadAll('Map') as $map) {
+    foreach (Leaflet::loadAll('Map') as $map) {
       foreach ($map->getObjects($this->getType()) as $object) {
         if ($object->machine_name == $this->machine_name) {
           $parents[$map->machine_name] = $map;
@@ -419,7 +442,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
   public function getJS() {
     $export = $this->getExport();
 
-foreach(leaflet::getPluginTypes() as $type) {
+    foreach(Leaflet::getPluginTypes() as $type) {
       unset($export->options[$type . 's']);
     }
 
@@ -448,4 +471,13 @@ foreach(leaflet::getPluginTypes() as $type) {
   public function getWeight() {
     return intval($this->weight);
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getPluginDescription() {
+    $plugin_definition = $this->getPluginDefinition();
+    return isset($plugin_definition['description']) ? $plugin_definition['description'] : '';
+  }
+
 }
