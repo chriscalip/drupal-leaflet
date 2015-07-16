@@ -1,0 +1,7 @@
+name = Leaflet Boxes
+description = Leaflet integration with Boxes module.
+core = 7.x
+package = "Leaflet"
+
+dependencies[] = leaflet
+dependencies[] = boxes

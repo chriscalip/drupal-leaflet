@@ -1,0 +1,7 @@
+name = Leaflet Quicktabs
+description = Leaflet integration with Quicktabs module.
+core = 7.x
+package = "Leaflet"
+
+dependencies[] = leaflet
+dependencies[] = quicktabs

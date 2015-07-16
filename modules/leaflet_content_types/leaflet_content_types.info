@@ -1,0 +1,6 @@
+name = Leaflet Content Types
+description = Map integration with CTools Content Types (for Panels panes)
+core = 7.x
+package = "Leaflet"
+
+dependencies[] = leaflet

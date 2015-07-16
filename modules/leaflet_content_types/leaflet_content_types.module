@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Leaflet CTools Content Types Integration module.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function leaflet_content_types_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/' . $plugin_type;
+  }
+}

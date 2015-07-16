@@ -1,0 +1,31 @@
+<?php
+/**
+ * @file
+ * Leaflet Boxes Integration module.
+ */
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function leaflet_boxes_ctools_plugin_api($module, $api) {
+  if ($module == 'boxes' && $api == 'plugins') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implements hook_boxes_plugins().
+ */
+function leaflet_boxes_boxes_plugins() {
+  return array(
+    'leaflet' => array(
+      'title' => 'Leaflet map',
+      'handler' => array(
+        'parent' => 'boxes_box',
+        'class' => 'leaflet',
+        'file' => 'leaflet.php',
+        'path' => drupal_get_path('module', 'leaflet_boxes') . '/plugins/boxes'
+      )
+    )
+  );
+}
