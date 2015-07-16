@@ -33,11 +33,11 @@ function leaflet_libraries_info() {
   $libraries['leaflet'] = array(
     'name' => 'Leaflet',
     'vendor url' => 'http://leafletjs.com/',
-    'download url' => 'http://leaflet-cdn.s3.amazonaws.com/build/leaflet-0.7.3.zip',
+    'download url' => 'http://cdn.leafletjs.com/downloads/leaflet-1.0.0-b1.zip',
     'version arguments' => array(
       'file' => 'leaflet-src.js',
-      'pattern' => '@L.version = \'(.*)\'@',
-      'lines' => 10,
+      'pattern' => '@version: \'(.*)\'@',
+      'lines' => 7,
     ),
     'files' => array(
       'js' => array(
