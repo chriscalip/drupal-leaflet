@@ -90,24 +90,30 @@ abstract class Map extends Object implements MapInterface {
           'leaflet-container',
         ),
       ),
-      'map' => array(
+      'map-container' => array(
         '#type' => 'container',
-        '#weight' => 0,
         '#attributes' => array(
-          'id' => $map->getId(),
           'style' => $css_styles,
-          'class' => array(
-            'leaflet-map',
-            $map->machine_name,
-          ),
+          'class' => array()
         ),
-        '#attached' => $attached,
-      ),
+        'map' => array(
+          '#type' => 'container',
+          '#attributes' => array(
+            'id' => $map->getId(),
+            'style' => $css_styles,
+            'class' => array(
+              'leaflet-map',
+              $map->machine_name,
+            ),
+          ),
+          '#attached' => $attached,
+        ),
+      )
     );
 
     // If this is an asynchronous map flag it as such.
     if ($asynchronous) {
-      $build['leaflet']['map']['#attributes']['class'][] = 'asynchronous';
+      $build['leaflet']['map-container']['map']['#attributes']['class'][] = 'asynchronous';
     }
 
     if ((bool) $this->getOption('capabilities', FALSE) === TRUE) {
