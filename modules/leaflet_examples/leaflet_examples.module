@@ -114,23 +114,23 @@ function leaflet_examples($form, &$form_state, $map_arg = NULL) {
       '#description' => 'Use your mouse to navigate the map. Double click to zoom, hold your click and move to dragpan.',
     );
 
-    if ((bool) $map->getOption('provideIframe', FALSE) == TRUE) {
-      $form_state['item'] = $map;
+    if (module_exists('leaflet_services')) {
+      if ((bool) $map->getOption('provideIframe', FALSE) == TRUE) {
+        $form_state['item'] = $map;
 
-      $form['form'][$map->getId()]['leaflet_services'] = array(
-        '#type' => 'fieldset',
-        '#collapsible' => TRUE,
-        '#collapsed' => TRUE,
-        '#title' => 'Embed this map in an iframe',
-      );
+        $form['form'][$map->getId()]['leaflet_services'] = array(
+          '#type' => 'fieldset',
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+          '#title' => 'Embed this map in an iframe',
+        );
 
-      if (module_exists('services')) {
         foreach (services_endpoint_load_all() as $service) {
-          if (isset($service->resources['leaflet']['operations']['retrieve']['enabled']) && $service->resources['leaflet']['operations']['retrieve']['enabled'] == 1) {
+          if (isset($service->resources['leaflet-map']['operations']['retrieve']['enabled']) && $service->resources['leaflet-map']['operations']['retrieve']['enabled'] == 1) {
 
             $width = ($map->getOption('width', 'auto') == 'auto') ? '100%' : $map->getOption('width', 'auto');
             $height = $map->getOption('height', 'auto');
-            $iframe = "<iframe src='" . url('leaflet/leaflet_map/' . $map->machine_name, array('absolute' => TRUE)) . "' width='" . $width . "' height='" . $height . "'/>";
+            $iframe = "<iframe src='" . url('leaflet/leaflet-map/' . $map->machine_name, array('absolute' => TRUE)) . "' width='" . $width . "' height='" . $height . "'/>";
 
             $form['form'][$map->getId()]['leaflet_services'][$map->machine_name] = array(
               '#type' => 'textarea',
