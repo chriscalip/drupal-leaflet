@@ -69,7 +69,7 @@ function leaflet_examples($form, &$form_state, $map_arg = NULL) {
     '#ajax' => array(
       'callback' => '_leaflet_examples_ajax_reload_default_map',
       'method' => 'replace',
-      'wrapper' => 'default_map_ajax',
+      'wrapper' => 'default_leaflet_map_ajax',
       'effect' => 'fade',
     ),
   );
@@ -77,7 +77,7 @@ function leaflet_examples($form, &$form_state, $map_arg = NULL) {
   $form['#token'] = NULL;
 
   $form['form'] = array(
-    '#prefix' => '<div id="default_map_ajax">',
+    '#prefix' => '<div id="default_leaflet_map_ajax">',
     '#suffix' => '</div>',
     '#type' => 'markup',
   );
@@ -215,7 +215,7 @@ function _leaflet_examples_ajax_reload_default_map($form, &$form_state) {
 function leaflet_examples_block_info() {
   return array(
     'leaflet_examples' => array(
-      'info' => 'leaflet Examples',
+      'info' => 'Leaflet Examples',
     ),
   );
 }
