@@ -9,6 +9,7 @@ namespace Drupal\leaflet\Types;
 use Drupal\leaflet\Component\Annotation\LeafletPlugin;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\leaflet\Leaflet;
+use Drupal\leaflet\Types\Object;
 
 
 /**
@@ -145,27 +146,32 @@ class Collection extends PluginBase {
       return array_change_key_case($list, CASE_LOWER);
     }
 
-    return $this->getFlatList($type);
+    return $this->getFlatList(array($type));
   }
 
   /**
-   * Flat array with all the collection objects.
+   * Return an array with all the collection objects.
    *
-   * @param string $type
-   *   Type to filter for. If set only a list with objects of this type is
-   *   returned.
+   * @param array $types
+   *   Array of type to filter for. If set, only a list with objects of this
+   *   type is returned.
    *
    * @return \Drupal\leaflet\Types\Object[]
    *   List of objects of this collection or list of a specific type of objects.
    */
-  public function getFlatList($type = NULL) {
+  public function getFlatList(array $types = array()) {
     $list = $this->objects;
 
-    if ($type != NULL) {
-      $type = drupal_strtolower($type);
-      $list = array_filter($this->objects, function($obj) use ($type) {
+    if (!empty($types)) {
+      $types = array_values($types);
+
+      array_walk($types, function(&$value) {
+        $value = drupal_strtolower($value);
+      });
+
+      $list = array_filter($this->objects, function($obj) use ($types) {
         /* @var Object $obj */
-        return $obj->getType() == $type;
+        return in_array($obj->getType(), $types);
       });
     }
 

@@ -5,6 +5,10 @@
  */
 
 function leaflet_contextual_links_leaflet_object_postprocess_alter(&$build, $context) {
+  if (!user_access('administer leaflet')) {
+    return FALSE;
+  }
+
   if (!($context instanceof Drupal\leaflet\Types\MapInterface)) {
     return FALSE;
   }
@@ -15,7 +19,7 @@ function leaflet_contextual_links_leaflet_object_postprocess_alter(&$build, $con
   }
 
   $current_path = current_path();
-  if ('system/ajax' == $current_path) {
+  if ('system/ajax' == $current_path && isset($_SESSION['current_path'])) {
     $current_path = $_SESSION['current_path'];
   }
 
@@ -29,7 +33,10 @@ function leaflet_contextual_links_leaflet_object_postprocess_alter(&$build, $con
     ),
   );
 
-  foreach ($context->getCollection()->getFlatList() as $object) {
+  $objects = $context->getCollection()->getFlatList(\Drupal\leaflet\Leaflet::getPluginTypes(array('map')));
+  ksort($objects);
+
+  foreach ($objects as $object) {
     $object_links = array();
 
     // Build contextual link for this object.
@@ -56,7 +63,7 @@ function leaflet_contextual_links_leaflet_object_postprocess_alter(&$build, $con
     }
   }
 
-  $build['contextual_links'] = array(
+  $build['leaflet']['contextual_links'] = array(
     '#prefix' => '<div class="contextual-links-wrapper">',
     '#suffix' => '</div>',
     '#theme' => 'links__contextual',
@@ -70,13 +77,14 @@ function leaflet_contextual_links_leaflet_object_postprocess_alter(&$build, $con
 }
 
 function leaflet_contextual_links_form_leaflet_map_form_settings_alter(&$form, &$form_state) {
-  $map = leaflet_object_load('Map', $form_state['item']);
+  if (($map = \Drupal\leaflet\Leaflet::load('Map', $form_state['item'])) == TRUE) {
 
-  $form['options']['ui']['contextualLinks'] = array(
-    '#type' => 'checkbox',
-    '#title' => 'Contextual links',
-    '#description' => t('Enable contextual links on the map.'),
-    '#default_value' => $map->getOption('contextualLinks', FALSE),
-    '#parents' => array('options', 'contextualLinks'),
-  );
+    $form['options']['ui']['contextualLinks'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Contextual links',
+      '#description' => t('Enable contextual links on the map.'),
+      '#default_value' => $map->getOption('contextualLinks', FALSE),
+      '#parents' => array('options', 'contextualLinks'),
+    );
+  }
 }
