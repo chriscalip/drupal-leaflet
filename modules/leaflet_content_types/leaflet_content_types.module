@@ -12,3 +12,16 @@ function leaflet_content_types_ctools_plugin_directory($owner, $plugin_type) {
     return 'plugins/' . $plugin_type;
   }
 }
+
+/**
+ * Implements hook_get_pane_links_alter().
+ */
+function leaflet_content_types_get_pane_links_alter(&$links, $pane, $content_type) {
+  if ($pane->type === 'leaflet' && !empty($pane->configuration['map'])) {
+    $destination = array('destination' => current_path());
+    $links['top'][] = array(
+      'title' => t('Edit map'),
+      'href' => url('admin/structure/leaflet/maps/list/' . $pane->configuration['map'] . '/edit', array('query' => $destination, 'absolute' => TRUE)),
+    );
+  }
+}
