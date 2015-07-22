@@ -33,12 +33,33 @@ abstract class Map extends Object implements MapInterface {
   }
 
   /**
+   * @inheritDoc
+   */
+  public function attached() {
+    $attached = parent::attached();
+
+    $settings = $this->getCollection()->getJS();
+    $settings['map'] = array_shift($settings['map']);
+
+    $attached['js'][] = array(
+      'data' => array(
+        'leaflet' => array(
+          'maps' => array(
+            $this->getId() => $settings,
+          ),
+        ),
+      ),
+      'type' => 'setting',
+    );
+
+    return $attached;
+  }
+
+  /**
    * {@inheritdoc}
    */
-  public function build() {
+  public function build($build = array()) {
     $map = $this;
-
-    $build = array();
 
     // Run prebuild hook to all objects who implements it.
     $map->preBuild($build, $map);
@@ -49,26 +70,10 @@ abstract class Map extends Object implements MapInterface {
       $asynchronous += (int) $object->isAsynchronous();
     }
 
-    $settings = $map->getCollection()->getJS();
-    $settings['map'] = $settings['map'][0];
-    $settings = array(
-      'data' => array(
-        'leaflet' => array(
-          'maps' => array(
-            $map->getId() => $settings,
-          ),
-        ),
-      ),
-      'type' => 'setting',
-    );
-
     // If this is asynchronous flag it as such.
     if ($asynchronous) {
       $settings['data']['leaflet']['maps'][$map->getId()]['map']['async'] = $asynchronous;
     }
-
-    $attached = $map->getCollection()->getAttached();
-    $attached['js'][] = $settings;
 
     $styles = array(
       'width' => $map->getOption('width'),
@@ -106,7 +111,7 @@ abstract class Map extends Object implements MapInterface {
               $map->machine_name,
             ),
           ),
-          '#attached' => $attached,
+          '#attached' => $map->getCollection()->getAttached(),
         ),
       )
     );

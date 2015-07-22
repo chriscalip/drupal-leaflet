@@ -9,7 +9,6 @@ namespace Drupal\leaflet\Types;
 use Drupal\leaflet\Component\Annotation\LeafletPlugin;
 use Drupal\Component\Plugin\PluginBase;
 use Drupal\leaflet\Leaflet;
-use Drupal\leaflet\Types\Object;
 
 
 /**
@@ -57,7 +56,7 @@ class Collection extends PluginBase {
    *   Object instance to add to this collection.
    */
   public function prepend(ObjectInterface $object) {
-    $this->objects = array_merge(array($object->getType() . '_' . $object->getMachineName() => $object), array_reverse($this->objects));
+    $this->objects = array_merge(array($object->getType() . '_' . $object->getMachineName() => $object), $this->objects);
   }
 
   /**
@@ -92,11 +91,11 @@ class Collection extends PluginBase {
     $attached = array();
     foreach ($this->getFlatList() as $object) {
       $object_attached = $object->attached() + array(
-          'js' => array(),
-          'css' => array(),
-          'library' => array(),
-          'libraries_load' => array(),
-        );
+        'js' => array(),
+        'css' => array(),
+        'library' => array(),
+        'libraries_load' => array(),
+      );
       foreach (array('js', 'css', 'library', 'libraries_load') as $type) {
         foreach ($object_attached[$type] as $data) {
           if (isset($attached[$type])) {
@@ -166,7 +165,7 @@ class Collection extends PluginBase {
       $type = drupal_strtolower($type);
       $list = array_filter($this->objects, function($obj) use ($type) {
         /* @var Object $obj */
-        return drupal_strtolower($obj->getType()) == $type;
+        return $obj->getType() == $type;
       });
     }
 

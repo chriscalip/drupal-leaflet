@@ -8,13 +8,24 @@ function _leaflet_services_retrieve($name) {
   if (($map = \Drupal\leaflet\Leaflet::load('Map', $name)) == TRUE) {
     $build = $map->build();
     $render = drupal_render($build);
-    $js = drupal_get_js();
-    $styles = drupal_get_css();
+
+    array_map(
+      'drupal_static_reset',
+      array(
+        'drupal_add_css',
+        'drupal_add_js',
+        'libraries_load',
+        'drupal_add_library'
+      )
+    );
+
+    drupal_process_attached(array('#attached' => $map->getCollection()->getAttached()));
+    drupal_add_css(drupal_get_path('module', 'leaflet_services') . '/css/reset.css');
 
     return theme('leaflet_map_iframe', array(
       'page' => $render,
-      'scripts' => $js,
-      'styles' => $styles,
+      'scripts' => drupal_get_js(),
+      'styles' => drupal_get_css(),
     ));
   }
 }

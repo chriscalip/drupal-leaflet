@@ -4,7 +4,7 @@ Drupal.behaviors.leaflet = (function($) {
     attach: function (context, settings) {
       Drupal.leaflet.pluginManager.attach(context, settings);
 
-      $('.leaflet-map:not(.asynchronous)').once('leaflet-map', function () {
+      $('.leaflet-map:not(.asynchronous)', context).once('leaflet-map', function () {
         var map_id = $(this).attr('id');
           if (typeof Drupal.settings.leaflet.maps[map_id] != 'undefined') {
             Drupal.leaflet.processMap(map_id, context);
@@ -12,7 +12,7 @@ Drupal.behaviors.leaflet = (function($) {
       });
 
       // Create dynamic callback functions for asynchronous maps.
-      $('.leaflet-map.asynchronous').once('leaflet-map.asynchronous', function () {
+      $('.leaflet-map.asynchronous', context).once('leaflet-map.asynchronous', function () {
         var map_id = $(this).attr('id');
           if (typeof Drupal.settings.leaflet.maps[map_id] != 'undefined') {
           Drupal.leaflet.asyncIsReadyCallbacks[map_id.replace(/[^0-9a-z]/gi, '_')] = function () {

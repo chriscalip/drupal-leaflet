@@ -46,7 +46,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
   /**
    * @var int
    */
-  protected $weight = -1;
+  protected $weight = 0;
   /**
    * The array containing the options.
    *
@@ -106,6 +106,9 @@ abstract class Object extends PluginBase implements ObjectInterface {
     }
 
     $form_state['item'] = $this->getExport();
+
+    // Refresh translatable strings.
+    $this->i18nStringsRefresh();
   }
 
   /**
@@ -114,10 +117,9 @@ abstract class Object extends PluginBase implements ObjectInterface {
   public function preBuild(array &$build, ObjectInterface $context = NULL) {
     foreach ($this->getCollection()->getFlatList() as $object) {
       if ($object !== $this) {
-        $object->preBuild($build, $this);
+        $object->preBuild($build, $context);
       }
     }
-
     drupal_alter('leaflet_object_preprocess', $build, $this);
   }
 
@@ -130,14 +132,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
         $object->postBuild($build, $context);
       }
     }
-
     drupal_alter('leaflet_object_postprocess', $build, $this);
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function build() {}
 
   /**
    * {@inheritdoc}
@@ -246,7 +242,11 @@ abstract class Object extends PluginBase implements ObjectInterface {
    */
   public function getMachineName() {
     $configuration = $this->getConfiguration();
-    return check_plain($configuration['machine_name']);
+    if (isset($configuration['machine_name'])) {
+      return check_plain($configuration['machine_name']);
+    } else {
+      return 'undefined';
+    }
   }
 
   /**
@@ -254,7 +254,11 @@ abstract class Object extends PluginBase implements ObjectInterface {
    */
   public function getName() {
     $configuration = $this->getConfiguration();
-    return check_plain($configuration['name']);
+    if (isset($configuration['name'])) {
+      return check_plain($configuration['name']);
+    } else {
+      return 'undefined';
+    }
   }
 
   /**
@@ -262,7 +266,11 @@ abstract class Object extends PluginBase implements ObjectInterface {
    */
   public function getDescription() {
     $configuration = $this->getConfiguration();
-    return check_plain($configuration['description']);
+    if (isset($configuration['description'])) {
+      return check_plain($configuration['description']);
+    } else {
+      return 'undefined';
+    }
   }
 
   /**
@@ -270,7 +278,11 @@ abstract class Object extends PluginBase implements ObjectInterface {
    */
   public function getFactoryService() {
     $configuration = $this->getConfiguration();
-    return check_plain($configuration['factory_service']);
+    if (isset($configuration['factory_service'])) {
+      return check_plain($configuration['factory_service']);
+    } else {
+      return 'undefined';
+    }
   }
 
   /**
@@ -358,17 +370,11 @@ abstract class Object extends PluginBase implements ObjectInterface {
    * {@inheritdoc}
    */
   public function getParents() {
-    $parents = array();
-
-    foreach (Leaflet::loadAll('Map') as $map) {
-      foreach ($map->getObjects($this->getType()) as $object) {
-        if ($object->machine_name == $this->machine_name) {
-          $parents[$map->machine_name] = $map;
-        }
-      }
-    }
-
-    return $parents;
+    return array_filter(Leaflet::loadAll('Map'), function($map) {
+      return array_filter($map->getObjects($this->getType()), function($object) {
+        return $object->getMachineName() == $this->getMachineName();
+      });
+    });
   }
 
   /**
@@ -414,7 +420,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
    */
   public function getType() {
     $class = explode('\\', get_class($this));
-    return $class[3];
+    return drupal_strtolower($class[3]);
   }
 
   /**
@@ -442,9 +448,9 @@ abstract class Object extends PluginBase implements ObjectInterface {
   public function getJS() {
     $export = $this->getExport();
 
-    foreach(Leaflet::getPluginTypes() as $type) {
+    array_map(function($type) use ($export) {
       unset($export->options[$type . 's']);
-    }
+    }, Leaflet::getPluginTypes());
 
     $js = array(
       'mn' => $export->machine_name,
@@ -480,4 +486,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
     return isset($plugin_definition['description']) ? $plugin_definition['description'] : '';
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function i18nStringsRefresh() {}
 }
