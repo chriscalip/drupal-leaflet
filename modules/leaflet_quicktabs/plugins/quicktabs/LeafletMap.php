@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Class for tab content of type "map" - this is for rendering a map as tab
+ * Class for tab content of type "leaflet_map" - this is for rendering a map as tab
  * content.
  */
 class LeafletMap extends QuickContent {
@@ -10,7 +10,7 @@ class LeafletMap extends QuickContent {
    * @inheritdoc
    */
   public static function getType() {
-    return 'map';
+    return 'Leaflet-map';
   }
 
   /**
@@ -20,12 +20,12 @@ class LeafletMap extends QuickContent {
     $tab = $this->settings;
     $form = array();
 
-    $form['map']['map'] = array(
+    $form['Leaflet-map']['map'] = array(
       '#type' => 'select',
       '#title' => t('Leaflet map'),
       '#options' => \Drupal\leaflet\Leaflet::loadAllAsOptions('Map'),
       "#empty_option" => t('- Select a map -'),
-      '#default_value' => isset($tab['map']) ? $tab['map'] : '',
+      '#default_value' => isset($tab['leaflet_map']) ? $tab['leaflet_map'] : '',
     );
     return $form;
   }
@@ -52,6 +52,6 @@ class LeafletMap extends QuickContent {
    * @inheritdoc
    */
   public function getAjaxKeys() {
-    return array('map');
+    return array('Leaflet-map');
   }
 }

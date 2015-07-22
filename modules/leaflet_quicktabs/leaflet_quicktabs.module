@@ -9,7 +9,7 @@
  */
 function leaflet_quicktabs_quicktabs_contents() {
   $info = array();
-  $info['map'] = array(
+  $info['Leaflet-map'] = array(
     'path' => drupal_get_path('module', 'leaflet_quicktabs') . '/plugins/quicktabs',
     'handler' => array(
       'file' => 'LeafletMap.php',
