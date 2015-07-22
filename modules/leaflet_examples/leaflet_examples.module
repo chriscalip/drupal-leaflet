@@ -92,7 +92,7 @@ function leaflet_examples($form, &$form_state, $map_arg = NULL) {
     );
 
     $map->clearOption('contextualLinks');
-    $map->setOption('height', '400px');
+    $map->setOption('height', '500px');
 
     if (isset($form_state['input']['zoom'])) {
       $map->setOption(array('view', 'zoom'), $form_state['input']['zoom']);
