@@ -81,17 +81,117 @@ function leaflet_field_field_formatter_info() {
       'label' => t('Leaflet map'),
       'field types' => array('leaflet_map'),
     ),
+    'leaflet_addressfield_textfield_formatter' => array(
+      'label' => t('Leaflet map (geocoded field)'),
+      'field types' => array('addressfield', 'text'),
+      'settings'  => array(
+        'map' => '',
+        'geocoder_handler' => '',
+        'geocoder_cache' => '',
+      ),
+    ),
   );
 }
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ */
+function leaflet_field_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+  $element = array();
+
+  // This following code is only selecting map with a particular source.
+  // Had to be disabled because it's too slow. We need to find a better way.
+  /*
+  $sources = \Drupal\leaflet\Leaflet::loadAll('source');
+  $maps = array();
+  foreach($sources as $index => $source) {
+    if ($source->getFactoryService() != 'leaflet.Layer:Field') {
+      $maps += $source->getParents();
+    }
+  }
+  */
+
+  $element['map'] = array(
+    '#type' => 'select',
+    '#title' => t('Select an Leaflet map'),
+    '#options' => \Drupal\leaflet\Leaflet::loadAllAsOptions('map'),
+    '#default_value' => $settings['map'],
+  );
+
+  $geocoder_handlers = array();
+  foreach (geocoder_handler_info() as $name => $handler) {
+    $geocoder_handlers[$name] = $handler['title'];
+  }
+
+  $element['geocoder_handler'] = array(
+    '#type' => 'select',
+    '#title' => t('Geocoder handler'),
+    '#options' => $geocoder_handlers,
+    '#default_value' => $settings['geocoder_handler'],
+  );
+
+  $element['geocoder_cache'] = array(
+    '#type' => 'select',
+    '#title' => t('Geocoder cache type'),
+    '#description' => t('Type of geocoder cache to use'),
+    '#options' => array(
+      0 => t('No caching'),
+      1 => t('Static-cache but no persistent-cache'),
+      2 => t('Both static-cache and persistent-cache'),
+    ),
+    '#default_value' => $settings['geocoder_cache'],
+  );
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ */
+function leaflet_field_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $geocoder_cache = 'Not defined.';
+  switch ($settings['geocoder_cache']) {
+    case 0:
+      $geocoder_cache = 'No cache';
+      break;
+
+    case 1:
+      $geocoder_cache = 'Static cache only';
+      break;
+
+    case 2:
+      $geocoder_cache = 'Static and persistent cache';
+      break;
+  }
+
+  $summary[] = t('Leaflet map: @map', array(
+    '@map' => $settings['map'],
+  ));
+  $summary[] = t('Geocoder handler: @geocoder_handler', array(
+    '@geocoder_handler' => $settings['geocoder_handler'],
+  ));
+  $summary[] = t('Geooder cache: @geocoder_cache', array(
+    '@geocoder_cache' => $geocoder_cache,
+  ));
+
+  return implode('<br/>', $summary);
+}
+
 
 /**
  * Implements hook_field_formatter_view().
  */
 function leaflet_field_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
+  $settings = $display['settings'];
 
   switch ($display['type']) {
-    // This formatter simply outputs the field as text and with a color.
+    // Render a simple map.
     case 'leaflet_map_formatter':
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
@@ -100,6 +200,48 @@ function leaflet_field_field_formatter_view($entity_type, $entity, $field, $inst
         );
       }
       break;
+
+    // Render an addressfield or a textield.
+    case 'leaflet_addressfield_textfield_formatter':
+      $sources = array();
+      $fields = array();
+      $map = \Drupal\leaflet\Leaflet::load('map', $settings['map']);
+
+      foreach ($map->getCollection()->getFlatList(array('source')) as $source) {
+        if ($source->getFactoryService() == 'leaflet.Layer:Field') {
+          $sources[] = $source;
+        }
+      }
+      foreach ($items as $delta => $item) {
+        // If item is an array without a 'value' key (ex: addressfield),
+        // we convert it to string, else we take the 'safe_value' of the field.
+        if (is_array($item) && !isset($item['value'])) {
+          $item = implode(' ', $item);
+        }
+        else {
+          $item = $item['safe_value'];
+        }
+
+        $fields[] = array(
+          'address' => $item,
+          'title' => entity_label($entity_type, $entity),
+          'description' => $item,
+        );
+      }
+
+      foreach ($sources as $source) {
+        $source->setOption('geocoder_handler', $settings['geocoder_handler']);
+        $source->setOption('geocoder_cache', $settings['geocoder_cache']);
+        $source->setOption('fields', $fields);
+      }
+
+      $element[0] = array(
+        '#type' => 'leaflet',
+        '#map' => $map,
+      );
+
+      break;
+
   }
 
   return $element;

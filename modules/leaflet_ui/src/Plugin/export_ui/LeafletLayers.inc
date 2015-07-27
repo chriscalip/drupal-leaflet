@@ -166,7 +166,6 @@ function leaflet_layer_form_style($form, &$form_state) {
     '#default_value' => isset($form_state['item']->options['style']) ? $form_state['item']->options['style'] : '',
     '#description' => t('Select the style.'),
     '#options' => \Drupal\leaflet\Leaflet::loadAllAsOptions('Style'),
-    '#required' => TRUE,
   );
 
   return $form;
