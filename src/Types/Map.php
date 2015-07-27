@@ -44,6 +44,9 @@ abstract class Map extends Object implements MapInterface {
     $attached['js'][] = array(
       'data' => array(
         'leaflet' => array(
+          'options' => array(
+            'library_path' => libraries_get_path('leaflet', TRUE)
+          ),
           'maps' => array(
             $this->getId() => $settings,
           ),

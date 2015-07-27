@@ -2,6 +2,8 @@ Drupal.behaviors.leaflet = (function($) {
   "use strict";
   return {
     attach: function (context, settings) {
+      L.Icon.Default.imagePath = Drupal.settings.leaflet.options.library_path + '/images';
+
       Drupal.leaflet.pluginManager.attach(context, settings);
 
       $('.leaflet-map:not(.asynchronous)', context).once('leaflet-map', function () {
