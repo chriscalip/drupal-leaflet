@@ -1,15 +1,16 @@
 <?php
 /**
  * @file
- * Class Component.
+ * Class Source.
  */
 
 namespace Drupal\leaflet\Types;
+use Drupal\leaflet\Leaflet;
 
 /**
- * Class Component.
+ * Class Source.
  */
-abstract class Component extends Object implements ComponentInterface {
+abstract class Source extends Object implements SourceInterface {
   /**
    * The array containing the options.
    *

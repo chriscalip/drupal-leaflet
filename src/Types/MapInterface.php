@@ -21,8 +21,12 @@ interface MapInterface extends ObjectInterface {
   /**
    * Build render array of a map.
    *
+   * @param array $build
+   *   The build array before being completed.
+   *
    * @return array
    *   The render array.
    */
-  public function build();
+  public function build(array $build = array());
+
 }

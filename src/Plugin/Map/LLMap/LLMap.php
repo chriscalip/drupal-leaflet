@@ -1,22 +1,24 @@
 <?php
 /**
  * @file
- * Map: LMap.
+ * Map: Map.
  */
 
-namespace Drupal\leaflet\Plugin\Map\LMap;
+namespace Drupal\leaflet\Plugin\Map\LLMap;
+
 use Drupal\leaflet\Component\Annotation\LeafletPlugin;
 use Drupal\leaflet\Config;
+use Drupal\leaflet\Leaflet;
 use Drupal\leaflet\Types\Map;
 
 /**
- * Class LMap.
+ * Class OLMap.
  *
  * @LeafletPlugin(
- *   id = "LMap"
+ *  id = "OLMap"
  * )
  */
-class LMap extends Map {
+class LLMap extends Map {
 
   /**
    * {@inheritdoc}
@@ -24,16 +26,16 @@ class LMap extends Map {
   public function optionsForm(&$form, &$form_state) {
     $form['options']['ui'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Size of the map'),
+      '#title' => t('User interface'),
       'width' => array(
         '#type' => 'textfield',
-        '#title' => 'Width',
+        '#title' => 'Width of the map',
         '#default_value' => $this->getOption('width', 'auto'),
         '#parents' => array('options', 'width'),
       ),
       'height' => array(
         '#type' => 'textfield',
-        '#title' => 'height',
+        '#title' => t('Height of the map'),
         '#default_value' => $this->getOption('height', '300px'),
         '#parents' => array('options', 'height'),
       ),
@@ -41,49 +43,61 @@ class LMap extends Map {
 
     $form['options']['view'] = array(
       '#type' => 'fieldset',
-      '#title' => t('View: center'),
+      '#title' => t('Center and rotation'),
       '#tree' => TRUE,
     );
 
-    if ($this->machine_name != Config::get('leaflet.edit_view_map')) {
-      $map = \Drupal\leaflet\Leaflet::load('Map', Config::get('leaflet.edit_view_map'));
-      if ($view = $this->getOption('view')) {
-        $map->setOption('view', $view);
-      }
+    if ($this->getMachineName() != Config::get('leaflet.edit_view_map')) {
+      if (($map = Leaflet::load('Map', Config::get('leaflet.edit_view_map'))) == TRUE) {
+        $map_configuration = $map->getConfiguration();
 
-      $form['options']['view']['map'] = array(
-        '#type' => 'leaflet',
-        '#description' => t('You can drag this map with your mouse.'),
-        '#map' => $map,
-      );
+        if ($view = $this->getOption('view')) {
+          // Don't apply min / max zoom settings to this map to avoid lock-in.
+          $view['minZoom'] = 0;
+          $view['maxZoom'] = 0;
+
+          $map->setOption('view', $view);
+        }
+
+        $form['options']['view']['map'] = array(
+          '#type' => 'leaflet',
+          '#description' => $map->getPluginDescription(),
+          '#map' => $map,
+        );
+      }
     }
 
     $form['options']['view']['center'] = array(
       '#tree' => TRUE,
       'lat' => array(
         '#type' => 'textfield',
-        '#title' => 'Latitude',
+        '#title' => t('Latitude'),
         '#default_value' => $this->getOption(array('view', 'center', 'lat'), 0),
       ),
       'lon' => array(
         '#type' => 'textfield',
-        '#title' => 'Longitude',
+        '#title' => t('Longitude'),
         '#default_value' => $this->getOption(array('view', 'center', 'lat'), 0),
       ),
     );
+    $form['options']['view']['rotation'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Rotation'),
+      '#default_value' => $this->getOption(array('view', 'rotation'), 0),
+    );
     $form['options']['view']['zoom'] = array(
       '#type' => 'textfield',
-      '#title' => 'Zoom',
+      '#title' => t('Zoom'),
       '#default_value' => $this->getOption(array('view', 'zoom'), 0),
     );
     $form['options']['view']['minZoom'] = array(
       '#type' => 'textfield',
-      '#title' => 'Min zoom',
+      '#title' => t('Min zoom'),
       '#default_value' => $this->getOption(array('view', 'minZoom'), 0),
     );
     $form['options']['view']['maxZoom'] = array(
       '#type' => 'textfield',
-      '#title' => 'Max zoom',
+      '#title' => t('Max zoom'),
       '#default_value' => $this->getOption(array('view', 'maxZoom'), 0),
     );
     $form['options']['view']['limit_extent'] = array(
@@ -106,6 +120,25 @@ class LMap extends Map {
       ),
     );
 
+    $form['options']['misc'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Miscellaneous options'),
+    );
+    $form['options']['misc']['renderer'] = array(
+      '#type' => 'radios',
+      '#title' => t('Renderer'),
+      '#description' => t('Renderer by default. Canvas, DOM and WebGL renderers are tested for support in that order. Note that at present only the Canvas renderer support vector data.'),
+      '#options' => array(
+        'canvas' => t('Canvas'),
+        'dom' => t('DOM'),
+        'webgl' => t('WebGL'),
+      ),
+      '#default_value' => $this->getOption('renderer', 'canvas'),
+      '#parents' => array('options', 'renderer'),
+    );
+
+
+    $i = 0;
     $data = array();
     $map_options = $this->getOptions();
     /* @var \Drupal\leaflet\Types\Object $object */
@@ -114,9 +147,9 @@ class LMap extends Map {
       if (isset($map_options['capabilities']['options']['table'][$object->getMachineName()])) {
         $weight = array_search($object->getMachineName(), array_keys($map_options['capabilities']['options']['table']));
       }
-      $data[$object->machine_name] = array(
-        'name' => $object->name,
-        'machine_name' => $object->machine_name,
+      $data[$object->getMachineName()] = array(
+        'name' => $object->getName(),
+        'machine_name' => $object->getMachineName(),
         'text' => isset($map_options['capabilities']['options']['table'][$object->getMachineName()]) ? $map_options['capabilities']['options']['table'][$object->getMachineName()] : $object->getPluginDescription(),
         'weight' => $weight,
         'enabled' => isset($map_options['capabilities']['options']['table'][$object->getMachineName()]) ? TRUE : FALSE,
@@ -127,12 +160,14 @@ class LMap extends Map {
     uasort($data, function($a, $b) {
       if ($a['enabled'] > $b['enabled']) {
         return -1;
-      } else if ($a['enabled'] < $b['enabled']) {
+      }
+      elseif ($a['enabled'] < $b['enabled']) {
         return 1;
       }
       if ($a['weight'] < $b['weight']) {
         return -1;
-      } else if ($a['weight'] > $b['weight']) {
+      }
+      elseif ($a['weight'] > $b['weight']) {
         return 1;
       }
       return 0;
@@ -153,27 +188,30 @@ class LMap extends Map {
               '#attributes' => array(
                 'class' => array('entry-order-weight'),
               ),
-            )),
+            ),
+          ),
           array(
             'data' => array(
               '#type' => 'hidden',
               '#default_value' => $entry['machine_name'],
-            )),
+            ),
+          ),
           array(
             'data' => array(
               '#type' => 'checkbox',
               '#title' => t('Enable'),
               '#title_display' => 'invisible',
               '#default_value' => $entry['enabled'],
-            )),
+            ),
+          ),
           array(
             'data' => array(
               '#type' => 'textfield',
               '#title' => t('Text'),
               '#title_display' => 'invisible',
               '#default_value' => $entry['text'],
-              '#maxlength' => 256
-            )
+              '#maxlength' => 256,
+            ),
           ),
           check_plain($entry['name']),
           check_plain($entry['machine_name']),
@@ -211,7 +249,7 @@ class LMap extends Map {
           '#title' => t('Container type'),
           '#options' => array(
             'fieldset' => 'Fieldset',
-            'container' => 'Simple div'
+            'container' => 'Simple div',
           ),
           '#default_value' => $this->getOption(array('capabilities', 'options', 'container_type'), 'fieldset'),
         ),
@@ -257,7 +295,7 @@ class LMap extends Map {
             ),
           ),
         ),
-      )
+      ),
     );
 
     // Add the table to the form.
@@ -285,6 +323,17 @@ class LMap extends Map {
    * {@inheritdoc}
    */
   public function optionsFormSubmit($form, &$form_state) {
+    // So we can use the map API instead of working with arrays.
+    parent::optionsFormSubmit($form, $form_state);
+
+    $limit_extent = $this->getOption(array('view', 'limit_extent'), '');
+    $extent = $this->getOption(array('view', 'extent'), '');
+
+    if (empty($limit_extent) || ($limit_extent == 'custom' && empty($extent))) {
+      unset($form_state['values']['options']['view']['extent']);
+      unset($form_state['values']['options']['view']['limit_extent']);
+    }
+
     $capabilities = array();
     if (isset($form_state['values']['options']['capabilities']['enabled']) && (bool) $form_state['values']['options']['capabilities']['enabled'] == TRUE) {
       $elements = (array) $form_state['values']['options']['capabilities']['options']['table']['elements'];
@@ -293,13 +342,14 @@ class LMap extends Map {
         return $a['weight'] - $b['weight'];
       });
 
-      foreach($elements as $data) {
+      foreach ($elements as $data) {
         if ((bool) $data['enabled'] == TRUE && !empty($data['text'])) {
           $capabilities[$data['machine_name']] = $data['text'];
         }
       }
       $form_state['values']['options']['capabilities']['options']['table'] = $capabilities;
-    } else {
+    }
+    else {
       $this->clearOption('capabilities');
       unset($form_state['values']['options']['capabilities']);
     }
@@ -311,13 +361,7 @@ class LMap extends Map {
    * {@inheritdoc}
    */
   public function attached() {
-    $attached = parent::attached();
-    // TODO: Leaflet settings form by default to debug mode.
-    $variant = NULL;
-    if (Config::get('leaflet.debug') == TRUE) {
-      $variant = 'debug';
-    };
-    $attached['libraries_load']['leaflet'] = array('leaflet', $variant);
-    return $attached;
+    return array_merge_recursive(parent::attached(), Leaflet::getAttached());
   }
+
 }

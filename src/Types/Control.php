@@ -15,5 +15,6 @@ abstract class Control extends Object implements ControlInterface {
    *
    * @var array
    */
-  protected $options = array();
+  protected $options;
+
 }

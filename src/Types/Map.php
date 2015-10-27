@@ -23,7 +23,7 @@ abstract class Map extends Object implements MapInterface {
    */
   public function getId() {
     if (!isset($this->id)) {
-      $css_map_name = drupal_clean_css_identifier($this->machine_name);
+      $css_map_name = drupal_clean_css_identifier($this->getMachineName());
       // Use uniqid to ensure we've really an unique id - otherwise there will
       // occur issues with caching.
       $this->id = drupal_html_id('leaflet-map-' . $css_map_name . '-' . uniqid('', TRUE));
@@ -33,7 +33,7 @@ abstract class Map extends Object implements MapInterface {
   }
 
   /**
-   * @inheritDoc
+   * {@inheritdoc}
    */
   public function attached() {
     $attached = parent::attached();
@@ -44,9 +44,6 @@ abstract class Map extends Object implements MapInterface {
     $attached['js'][] = array(
       'data' => array(
         'leaflet' => array(
-          'options' => array(
-            'library_path' => libraries_get_path('leaflet', TRUE)
-          ),
           'maps' => array(
             $this->getId() => $settings,
           ),
@@ -58,10 +55,11 @@ abstract class Map extends Object implements MapInterface {
     return $attached;
   }
 
+
   /**
    * {@inheritdoc}
    */
-  public function build($build = array()) {
+  public function build(array $build = array()) {
     $map = $this;
 
     // Run prebuild hook to all objects who implements it.
@@ -81,13 +79,11 @@ abstract class Map extends Object implements MapInterface {
     $styles = array(
       'width' => $map->getOption('width'),
       'height' => $map->getOption('height'),
-      'overflow' => 'hidden',
     );
 
-    $css_styles = '';
-    foreach ($styles as $property => $value) {
-      $css_styles .= $property . ':' . $value . ';';
-    }
+    $styles = implode(array_map(function($k, $v) {
+      return $k . ':' . $v . ';';
+    }, array_keys($styles), $styles));
 
     $build['leaflet'] = array(
       '#type' => 'container',
@@ -101,22 +97,24 @@ abstract class Map extends Object implements MapInterface {
       'map-container' => array(
         '#type' => 'container',
         '#attributes' => array(
-          'style' => $css_styles,
-          'class' => array()
+          'id' => 'map-container-' . $map->getId(),
+          'style' => $styles,
+          'class' => array(
+            'leaflet-map-container',
+          ),
         ),
         'map' => array(
           '#type' => 'container',
           '#attributes' => array(
             'id' => $map->getId(),
-            'style' => $css_styles,
             'class' => array(
               'leaflet-map',
-              $map->machine_name,
+              $map->getMachineName(),
             ),
           ),
           '#attached' => $map->getCollection()->getAttached(),
         ),
-      )
+      ),
     );
 
     // If this is an asynchronous map flag it as such.
@@ -127,12 +125,6 @@ abstract class Map extends Object implements MapInterface {
     if ((bool) $this->getOption('capabilities', FALSE) === TRUE) {
       $items = array_values($this->getOption(array('capabilities', 'options', 'table'), array()));
       array_walk($items, 'check_plain');
-
-      $variables = array(
-        'items' => $items,
-        'title' => '',
-        'type' => 'ul',
-      );
 
       $build['leaflet']['capabilities'] = array(
         '#weight' => 1,
@@ -145,13 +137,20 @@ abstract class Map extends Object implements MapInterface {
           '#type' => 'container',
           '#attributes' => array(
             'class' => array(
-              'description'
-            )
+              'description',
+            ),
           ),
           array(
-            '#markup' => theme('item_list', $variables)
-          )
-        )
+            '#markup' => theme(
+              'item_list',
+              array(
+                'items' => $items,
+                'title' => '',
+                'type' => 'ul',
+              )
+            ),
+          ),
+        ),
       );
     }
 

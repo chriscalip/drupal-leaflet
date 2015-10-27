@@ -22,16 +22,17 @@ use Drupal\leaflet\Types\Object;
 class Collection extends PluginBase {
 
   /**
-   * @var ObjectInterface[]
-   *  List of objects in this collection. The items have to be instances of
-   * \Drupal\leaflet\Types\Object.
+   * @var ObjectInterface[] $objects
+   *   List of objects in this collection. The items have to be instances of
+   *   \Drupal\leaflet\Types\Object.
    */
   protected $objects = array();
 
   /**
    * Import a flat list of Leaflet Objects.
    *
-   * @param array ObjectInterface[]
+   * @param ObjectInterface[] $import
+   *   The array of objects to import.
    */
   public function import(array $import = array()) {
     foreach ($import as $object) {
@@ -47,6 +48,7 @@ class Collection extends PluginBase {
    *   Object instance to add to this collection.
    */
   public function append(ObjectInterface $object) {
+    $object->setWeight($object->getWeight() + count($this->objects));
     $this->objects[$object->getType() . '_' . $object->getMachineName()] = $object;
   }
 
@@ -63,7 +65,7 @@ class Collection extends PluginBase {
   /**
    * Remove object from this collection.
    *
-   * @param \Drupal\leaflet\Types\ObjectInterface $object
+   * @param ObjectInterface $object
    *   Object instance to remove from this collection.
    */
   public function delete(ObjectInterface $object) {
@@ -198,11 +200,12 @@ class Collection extends PluginBase {
    * Get the collection as an export array with id's instead of objects.
    *
    * @return array
+   *   The export array.
    */
   public function getExport() {
     $export = array();
     foreach ($this->getFlatList() as $object) {
-      $export[$object->getType()][] = $object->machine_name;
+      $export[$object->getType()][] = $object->getMachineName();
     }
     return array_change_key_case($export, CASE_LOWER);
   }

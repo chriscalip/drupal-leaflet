@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Contains Leaflet
+ * Contains Leaflet.
  */
 
 namespace Drupal\leaflet;
@@ -58,11 +58,13 @@ class Leaflet {
    * Load a CTools exportable.
    *
    * @param string $object_type
-   *   Type of object to load: map|layer|source|control|interaction|style|component
+   *   Type of object to load:
+   *   map|layer|source|control|interaction|style|component .
    * @param string $export_id
-   *   The exportable id
+   *   The exportable id.
    *
    * @return array
+   *   The exported object.
    */
   public static function loadExportable($object_type, $export_id) {
     ctools_include('export');
@@ -131,7 +133,8 @@ class Leaflet {
         $plugin_manager = \Drupal::service($plugin_manager_id);
         if ($plugin_manager->hasDefinition($plugin_id)) {
           $object = $plugin_manager->createInstance($plugin_id, $configuration);
-        } else {
+        }
+        else {
           $configuration += array(
             'type' => $object_type,
             'errorMessage' => 'Unable to load @type @machine_name',
@@ -150,6 +153,9 @@ class Leaflet {
     else {
       $configuration += array(
         'type' => $object_type,
+        'name' => 'Error',
+        'description' => 'Error',
+        'factory_service' => '',
         'machine_name' => $export,
         'errorMessage' => 'Unable to load CTools exportable @type @machine_name.',
       );
@@ -168,9 +174,12 @@ class Leaflet {
   /**
    * Load all objects.
    *
-   * @param null $type
-   *   Type of object to load: map|layer|source|control|interaction|style|component
+   * @param string $object_type
+   *   Type of object to load:
+   *   map|layer|source|control|interaction|style|component.
+   *
    * @return \Drupal\leaflet\Types\Object[]
+   *   The array of objects.
    */
   public static function loadAll($object_type = NULL) {
     $objects = array();
@@ -182,7 +191,13 @@ class Leaflet {
     return $objects;
   }
 
-  public static function save(Object $object) {
+  /**
+   * Save an object in the database.
+   *
+   * @param ObjectInterface $object
+   *   The object to save.
+   */
+  public static function save(ObjectInterface $object) {
     ctools_include('export');
     $configuration = $object->getConfiguration();
     $export = $object->getExport();
@@ -200,7 +215,7 @@ class Leaflet {
   public static function getPluginTypes(array $filter = array()) {
     $plugins = array();
 
-    foreach(\Drupal::getContainer()->getDefinitions() as $id => $definition) {
+    foreach (\Drupal::getContainer()->getDefinitions() as $id => $definition) {
       $id = explode(".", drupal_strtolower($id));
       if (count($id) == 2) {
         if ($id[0] == 'leaflet') {
@@ -217,7 +232,7 @@ class Leaflet {
   }
 
   /**
-   * Return information about the Leaflet library if installed.
+   * Return information about the Leaflet 3 if installed.
    *
    * @return array|false
    */
@@ -226,7 +241,48 @@ class Leaflet {
   }
 
   /**
-   * @TODO describe what this does.
+   * Return the version of the Leaflet library in use.
+   *
+   * @return string
+   */
+  public static function getLibraryVersion() {
+    $variant = \Drupal\leaflet\Config::get('leaflet.variant');
+
+    if (strpos($variant, 'local-') !== FALSE) {
+      $version = self::getLocalLibraryVersion();
+    } else {
+      $version = \Drupal\leaflet\Config::get('leaflet.variant', NULL);
+    }
+
+    return $version;
+  }
+
+  /**
+   * Return the version of the Leaflet library in use.
+   *
+   * @return string
+   */
+  public static function getLocalLibraryVersion() {
+    $version = FALSE;
+    if ($path = libraries_get_path('leaflet')) {
+      $library = libraries_detect('leaflet');
+      $options = array(
+        'file' => 'leaflet.js',
+        'pattern' => '@Leaflet (.*)@',
+        'lines' => 2,
+      );
+      $library['library path'] = $path;
+      if ($version = libraries_get_version($library, $options)) {
+        $version = substr($version, 1);
+      }
+    }
+
+    return $version;
+  }
+
+
+  /**
+   * Apply a function recursively to all the value of an array.
    *
    * @param callable $func
    *   Function to call.
@@ -257,7 +313,7 @@ class Leaflet {
   }
 
   /**
-   * Ensures a value is of type float if it is a numeric value.
+   * Ensures a value is of type float or integer if it is a numeric value.
    *
    * @param mixed $var
    *   The value to type cast if possible.
@@ -277,17 +333,15 @@ class Leaflet {
    *
    * Empty means empty($value) AND not 0.
    *
-   * @TODO could we use array_walk_recursive($array, 'array_filter');?
-   *
    * @param array $array
    *   The array to clean.
    *
    * @return array
    *   The cleaned array.
    */
-  public static function removeEmptyElements($array) {
+  public static function removeEmptyElements(array $array) {
     foreach ($array as $key => $value) {
-      if (empty($value) && $value != 0) {
+      if ($value === '' && $value !== 0) {
         unset($array[$key]);
       }
       elseif (is_array($value)) {
@@ -295,6 +349,66 @@ class Leaflet {
       }
     }
     return $array;
+  }
+
+  /**
+   * Returns an array with positioning options.
+   *
+   * @return array
+   *   Array with positioning options.
+   */
+  public static function positioningOptions() {
+    return array(
+      'bottom-left' => t('bottom-left'),
+      'bottom-center' => t('bottom-center'),
+      'bottom-right' => t('bottom-right'),
+      'center-left' => t('center-left'),
+      'center-center' => t('center-center'),
+      'center-right' => t('center-right'),
+      'top-left' => t('top-left'),
+      'top-center' => t('top-center'),
+      'top-right' => t('top-right'),
+    );
+  }
+
+  /**
+   * The list of geometries available.
+   *
+   * @return array
+   *   The list of geometries.
+   */
+  public static function getGeometryTypes() {
+    return array(
+      'Point' => t('Point'),
+      'MultiPoint' => t('MultiPoint'),
+      'LineString' => t('LineString'),
+      'LinearRing' => t('LinearRing'),
+      'MultiLineString' => t('MultiLineString'),
+      'Polygon' => t('Polygon'),
+      'MultiPolygon' => t('MultiPolygon'),
+      'GeometryCollection' => t('GeometryCollection'),
+      'Circle' => t('Circle'),
+    );
+  }
+
+  /**
+   * Returns the list of files libraries or js/css files needed according to
+   * the settings.
+   *
+   * @return array
+   */
+  public static function getAttached() {
+    $attached = array();
+
+    $attached['libraries_load'] = array(
+      'leaflet' => array('leaflet', Config::get('leaflet.variant', NULL)),
+    );
+
+    if (Config::get('leaflet.debug', FALSE)) {
+      $attached['libraries_load']['leaflet_integration'] = array('leaflet_integration', 'debug');
+    };
+
+    return $attached;
   }
 
 }

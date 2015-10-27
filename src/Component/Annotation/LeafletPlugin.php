@@ -10,7 +10,7 @@ namespace Drupal\leaflet\Component\Annotation;
 use Drupal\Component\Annotation\Plugin;
 
 /**
- * Defines a Leaflet Plugin annotation object.
+ * Defines an Leaflet Plugin annotation object.
  *
  * @ingroup plugin_api
  *

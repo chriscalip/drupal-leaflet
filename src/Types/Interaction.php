@@ -1,15 +1,15 @@
 <?php
 /**
  * @file
- * Class Component.
+ * Class Interaction.
  */
 
 namespace Drupal\leaflet\Types;
 
 /**
- * Class Component.
+ * Class Interaction.
  */
-abstract class Component extends Object implements ComponentInterface {
+abstract class Interaction extends Object implements InteractionInterface {
   /**
    * The array containing the options.
    *

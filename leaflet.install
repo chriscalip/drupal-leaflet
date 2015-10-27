@@ -4,7 +4,6 @@
  * Leaflet module - installation procedure.
  */
 
-
 /**
  * Implements hook_uninstall().
  */
@@ -47,6 +46,7 @@ function leaflet_schema() {
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
+        'default' => '',
       ),
       'name' => array(
         'description' => 'The title of the map.',
@@ -57,17 +57,14 @@ function leaflet_schema() {
       'description' => array(
         'description' => 'The description of the map.',
         'type' => 'text',
-        'not null' => TRUE,
       ),
       'factory_service' => array(
         'type' => 'text',
-        'not null' => TRUE,
         'description' => 'Map service.',
       ),
       'options' => array(
         'description' => 'The serialized map.',
         'type' => 'text',
-        'not null' => TRUE,
         'serialize' => TRUE,
       ),
     ),
@@ -99,6 +96,7 @@ function leaflet_schema() {
         'type' => 'varchar',
         'length' => '255',
         'not null' => TRUE,
+        'default' => '',
         'description' => 'Layer system name.',
       ),
       'name' => array(
@@ -110,18 +108,67 @@ function leaflet_schema() {
       ),
       'description' => array(
         'type' => 'text',
-        'not null' => TRUE,
         'description' => 'Layer description.',
       ),
       'factory_service' => array(
         'type' => 'text',
-        'not null' => TRUE,
         'description' => 'Layer service.',
       ),
       'options' => array(
         'type' => 'text',
-        'not null' => FALSE,
         'description' => 'Layer options serialized.',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('machine_name'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name'),
+    ),
+  );
+  // Sources table (ctools extras).
+  $schema['leaflet_sources'] = array(
+    'description' => 'Storage for user defined Leaflet sources.',
+    'export' => array(
+      'admin_title' => 'machine_name',
+      'key' => 'machine_name',
+      'key name' => 'Machine name',
+      'primary key' => 'machine_name',
+      'identifier' => 'leaflet_source',
+      'default hook' => 'default_leaflet_sources',
+      'cache defaults' => TRUE,
+      'api' => array(
+        'owner' => 'leaflet',
+        'api' => 'default_leaflet_sources',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'machine_name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Source system name.',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Source name.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'description' => 'Source description.',
+      ),
+      'factory_service' => array(
+        'type' => 'text',
+        'description' => 'Service class.',
+      ),
+      'options' => array(
+        'type' => 'text',
+        'description' => 'Source options serialized.',
         'serialize' => TRUE,
       ),
     ),
@@ -165,18 +212,67 @@ function leaflet_schema() {
       ),
       'description' => array(
         'type' => 'text',
-        'not null' => TRUE,
         'description' => 'Control description.',
       ),
       'factory_service' => array(
         'type' => 'text',
-        'not null' => TRUE,
         'description' => 'Control service.',
       ),
       'options' => array(
         'type' => 'text',
-        'not null' => FALSE,
         'description' => 'Control options serialized.',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('machine_name'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name'),
+    ),
+  );
+  // Interactions table.
+  $schema['leaflet_interactions'] = array(
+    'description' => 'Storage for user defined Leaflet interactions.',
+    'export' => array(
+      'admin_title' => 'machine_name',
+      'key' => 'machine_name',
+      'key name' => 'Machine name',
+      'primary key' => 'machine_name',
+      'identifier' => 'leaflet_interaction',
+      'default hook' => 'default_leaflet_interactions',
+      'cache defaults' => TRUE,
+      'api' => array(
+        'owner' => 'leaflet',
+        'api' => 'default_leaflet_interactions',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'machine_name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Interaction system name.',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Interaction name.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'description' => 'Interaction description.',
+      ),
+      'factory_service' => array(
+        'type' => 'text',
+        'description' => 'Interaction service.',
+      ),
+      'options' => array(
+        'type' => 'text',
+        'description' => 'Interaction options serialized.',
         'serialize' => TRUE,
       ),
     ),
@@ -220,18 +316,114 @@ function leaflet_schema() {
       ),
       'description' => array(
         'type' => 'text',
-        'not null' => TRUE,
         'description' => 'Component description.',
       ),
       'factory_service' => array(
         'type' => 'text',
-        'not null' => TRUE,
         'description' => 'Component service.',
       ),
       'options' => array(
         'type' => 'text',
-        'not null' => FALSE,
         'description' => 'Component options serialized.',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('machine_name'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name'),
+    ),
+  );
+  // Projections table.
+  $schema['leaflet_projections'] = array(
+    'description' => 'Storage for user defined Leaflet projections.',
+    'export' => array(
+      'admin_title' => 'machine_name',
+      'key' => 'machine_name',
+      'key name' => 'Machine name',
+      'primary key' => 'machine_name',
+      'identifier' => 'leaflet_projection',
+      'default hook' => 'default_leaflet_projections',
+      'cache defaults' => TRUE,
+      'api' => array(
+        'owner' => 'leaflet',
+        'api' => 'default_leaflet_projections',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'machine_name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Projection system name.',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Projection name.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'description' => 'Projection description.',
+      ),
+      'definition' => array(
+        'type' => 'text',
+        'description' => 'Projection options definition.',
+      ),
+    ),
+    'primary key' => array('machine_name'),
+    'unique keys' => array(
+      'machine_name' => array('machine_name'),
+    ),
+  );
+  // Styles table.
+  $schema['leaflet_styles'] = array(
+    'description' => 'Storage for user defined Leaflet styles.',
+    'export' => array(
+      'admin_title' => 'machine_name',
+      'key' => 'machine_name',
+      'key name' => 'Machine name',
+      'primary key' => 'machine_name',
+      'identifier' => 'leaflet_style',
+      'default hook' => 'default_leaflet_styles',
+      'cache defaults' => TRUE,
+      'api' => array(
+        'owner' => 'leaflet',
+        'api' => 'default_leaflet_styles',
+        'minimum_version' => 1,
+        'current_version' => 1,
+      ),
+    ),
+    'fields' => array(
+      'machine_name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Style system name.',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Style name.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'description' => 'Style description.',
+      ),
+      'factory_service' => array(
+        'type' => 'text',
+        'description' => 'Style service.',
+      ),
+      'options' => array(
+        'type' => 'text',
+        'description' => 'Style options serialized.',
         'serialize' => TRUE,
       ),
     ),
@@ -251,20 +443,18 @@ function leaflet_requirements($phase) {
   $t = get_t();
 
   if ($phase != 'install') {
-    $leaflet = libraries_detect('leaflet');
-
-    if ($leaflet) {
+    if (($library = libraries_detect('leaflet')) && !empty($library['installed'])) {
       $requirements['leaflet'] = array(
-        'title' => $t('Leaflet library installed'),
+        'title' => $t('Leaflet'),
         'severity' => REQUIREMENT_OK,
-        'value' => $t('Leaflet %version library installed at %path', array('%path' => $leaflet['library path'], '%version' => $leaflet['version'])),
+        'value' => $t('Leaflet %version installed at %path', array('%path' => $library['library path'], '%version' => $library['version'])),
       );
     }
     else {
       $requirements['leaflet'] = array(
         'title' => $t('Leaflet'),
         'severity' => REQUIREMENT_ERROR,
-        'value' => $t('Leaflet library was not found.'),
+        'value' => $t('Leaflet library was not found. To install it, <a href="@url">download it manually</a> or use <em>drush dl-leaflet</em>. The library directory must be named <em>leaflet3</em> to be recognized by this module.', array('@url' => $library['download url'])),
       );
     }
   }

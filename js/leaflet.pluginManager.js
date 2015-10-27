@@ -1,8 +1,11 @@
-Drupal.leaflet.pluginManager = (function($) {
+(function ($, Drupal) {
+
   "use strict";
+
   var plugins = [];
-  return {
-    attach: function(context, settings) {
+
+  Drupal.leaflet.pluginManager = {
+    attach: function (context, settings) {
       for (var i in plugins) {
         var plugin = plugins[i];
         if (typeof plugin.attach === 'function') {
@@ -10,7 +13,7 @@ Drupal.leaflet.pluginManager = (function($) {
         }
       }
     },
-    detach: function(context, settings) {
+    detach: function (context, settings) {
       for (var i in plugins) {
         var plugin = plugins[i];
         if (typeof plugin.detach === 'function') {
@@ -18,38 +21,42 @@ Drupal.leaflet.pluginManager = (function($) {
         }
       }
     },
-    alter: function(){
+    alter: function () {
       // @todo: alter hook
     },
-    getPlugin: function(factoryService) {
+    getPlugin: function (factoryService) {
       if (this.isRegistered(factoryService)) {
         return plugins[factoryService];
       }
       return false;
     },
-    getPlugins: function(){
+    getPlugins: function () {
       return Object.keys(plugins);
     },
-    register: function(plugin) {
-      if (typeof plugin !== 'object') {
+    register: function (plugin) {
+      if ((typeof plugin !== 'object') || (plugin === null)) {
         return false;
       }
 
-      if (!plugin.hasOwnProperty('fs') || typeof plugin.init !== 'function') {
+      if (typeof plugin.init !== 'function') {
+        return false;
+      }
+
+      if (!plugin.hasOwnProperty('fs')) {
         return false;
       }
 
       plugins[plugin.fs] = plugin;
     },
-    createInstance: function(factoryService, data) {
+    createInstance: function (factoryService, data) {
       if (!this.isRegistered(factoryService)) {
         return false;
       }
 
       try {
         var obj = plugins[factoryService].init(data);
-      } catch(e) {
-        if (typeof console !== 'undefined') {
+      } catch (e) {
+        if (console !== undefined) {
           Drupal.leaflet.console.log(e.message);
           Drupal.leaflet.console.log(e.stack);
         }
@@ -59,15 +66,17 @@ Drupal.leaflet.pluginManager = (function($) {
         }
       }
 
-      if (typeof obj == 'object') {
+      var objType = typeof obj;
+      if ((objType === 'object') && (objType !== null) || (objType === 'function')) {
         obj.mn = data.data.mn;
         return obj;
       }
 
       return false;
     },
-    isRegistered: function(factoryService) {
+    isRegistered: function (factoryService) {
       return (factoryService in plugins);
     }
   };
-})(jQuery);
+
+}(jQuery, Drupal));

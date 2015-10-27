@@ -21,114 +21,9 @@ function leaflet_permission() {
   return array(
     'administer leaflet' => array(
       'title' => t('Administer Leaflet'),
-      'description' => t('Configure Leaflet settings and maps.'),
+      'description' => t('Configure Leaflet settings, styles, maps, and layers.'),
     ),
   );
-}
-
-/**
- * Implements hook_libraries_info().
- */
-function leaflet_libraries_info() {
-  $libraries['leaflet'] = array(
-    'name' => 'Leaflet',
-    'vendor url' => 'http://leafletjs.com/',
-    'download url' => 'http://cdn.leafletjs.com/downloads/leaflet-1.0.0-b1.zip',
-    'version arguments' => array(
-      'file' => 'leaflet-src.js',
-      'pattern' => '@version: \'(.*)\'@',
-      'lines' => 7,
-    ),
-    'files' => array(
-      'js' => array(
-        'leaflet.js' => array(
-          'type' => 'file',
-          'weight' => 6,
-          'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-        ),
-      ),
-      'css' => array(
-        'leaflet.css' => array(
-          'type' => 'file',
-          'weight' => 4,
-          'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-        )
-      ),
-    ),
-    'integration files' => array(
-      'leaflet' => array(
-        'js' => array(
-          'js/leaflet.js' => array(
-            'type' => 'file',
-            'weight' => 8,
-            'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-          ),
-          'js/leaflet.pluginManager.js' => array(
-            'type' => 'file',
-            'weight' => 12,
-            'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-          ),
-          'js/leaflet.behaviors.js' => array(
-            'type' => 'file',
-            'weight' => 14,
-            'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-          ),
-        ),
-      ),
-    ),
-    'variants' => array(
-      'debug' => array(
-        'files' => array(
-          'js' => array(
-            'leaflet-src.js' => array(
-              'type' => 'file',
-              'weight' => 2,
-              'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-            ),
-          ),
-          'css' => array(
-            'leaflet.css' => array(
-              'type' => 'file',
-              'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-            )
-          ),
-        ),
-        'integration files' => array(
-          'leaflet' => array(
-            'js' => array(
-              'js/leaflet.js' => array(
-                'type' => 'file',
-                'weight' => 8,
-                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-              ),
-              'js/leaflet.pluginManager.js' => array(
-                'type' => 'file',
-                'weight' => 12,
-                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-              ),
-              'js/leaflet.behaviors.js' => array(
-                'type' => 'file',
-                'weight' => 14,
-                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-              ),
-              'js/leaflet.console.js' => array(
-                'type' => 'file',
-                'weight' => 16,
-                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-              ),
-              'js/leaflet.debug.js' => array(
-                'type' => 'file',
-                'weight' => 18,
-                'group' => \Drupal\leaflet\Config::get('leaflet.js_css.group'),
-              ),
-            ),
-          ),
-        ),
-      ),
-    ),
-  );
-
-  return $libraries;
 }
 
 /**
@@ -279,43 +174,168 @@ function leaflet_i18n_string_remove($name, $string = NULL, $options = array()) {
 }
 
 /**
- * Form callback handler to prepare the developer dialog form.
- *
- * Prepares an object options form to be used in a frontend development dialog.
- *
- * @param array $form
- *   The form array - likely emtpy.
- * @param array $form_state
- *   The form state.
- * @param object $object
- *   The object that provides the options form. Has to have the public method
- *   optionsForms().
- *
- * @return array
- *   The populated form.
- *
- * @see \Drupal\leaflet\Plugin\Source\GeoJSON\GeoJSON::getJS()
+ * Implements hook_i18n_string_refresh().
  */
-function leaflet_dev_dialog_form($form, $form_state, $object) {
-  $object->optionsForm($form, $form_state);
-  leaflet_dev_dialog_form_clean($form);
-  return $form;
+function leaflet_i18n_string_refresh() {
+  foreach (\Drupal\leaflet\Leaflet::getPluginTypes() as $type) {
+    foreach (\Drupal\leaflet\Leaflet::loadAllExportable($type) as $machine_name => $exportable) {
+      $object = \Drupal\leaflet\Leaflet::load($type, $exportable);
+      $object->i18nStringsRefresh();
+    }
+  }
 }
 
 /**
- * Prepares a form structure to be added to a development dialog.
- *
- * Removes all JS related stuff.
- *
- * @param array $form
- *   The form array to prepare.
+ * Implements hook_libraries_info().
  */
-function leaflet_dev_dialog_form_clean(array &$form) {
-  foreach (element_children($form) as $key) {
-    unset(
-      $form[$key]['#states'],
-      $form[$key]['#attached']
-    );
-    leaflet_dev_dialog_form_clean($form[$key]);
+function leaflet_libraries_info() {
+  $js_css_group = 'leaflet';
+  if (class_exists('\Drupal\leaflet\Config')) {
+    $js_css_group = \Drupal\leaflet\Config::get('leaflet.js_css.group');
   }
+
+  $info = system_get_info('module', 'leaflet');
+  $version = $info['version'] ? $info['version'] : '7.x-3.x';
+  $module_path = drupal_get_path('module', 'leaflet');
+
+  $libraries['leaflet_integration'] = array(
+    'name' => 'Leaflet 3 Drupal integration files',
+    'vendor url' => 'https://drupal.org/project/leaflet',
+    'download url' => 'https://drupal.org/project/leaflet',
+    'version' => $version,
+    'library path' => $module_path,
+    'files' => array(
+      'js' => array(
+        $module_path . '/js/leaflet.js' => array(
+          'data' => $module_path . '/js/leaflet.js',
+          'type' => 'file',
+          'weight' => 8,
+          'group' => $js_css_group,
+        ),
+        $module_path . '/js/leaflet.pluginManager.js' => array(
+          'data' => $module_path . '/js/leaflet.pluginManager.js',
+          'type' => 'file',
+          'weight' => 12,
+          'group' => $js_css_group,
+        ),
+        $module_path . '/js/leaflet.behaviors.js' => array(
+          'data' => $module_path . '/js/leaflet.behaviors.js',
+          'type' => 'file',
+          'weight' => 14,
+          'group' => $js_css_group,
+        ),
+      ),
+      'css' => array(
+        $module_path . '/css/leaflet.css' => array(
+          'data' => $module_path . '/css/leaflet.css',
+          'type' => 'file',
+          'weight' => 4,
+          'group' => $js_css_group,
+        ),
+      ),
+    ),
+    'variants' => array(
+      'debug' => array(
+        'files' => array(
+          'js' => array(
+            'js/leaflet.js' => array(
+              'type' => 'file',
+              'weight' => 8,
+              'group' => $js_css_group,
+            ),
+            'js/leaflet.pluginManager.js' => array(
+              'type' => 'file',
+              'weight' => 12,
+              'group' => $js_css_group,
+            ),
+            'js/leaflet.behaviors.js' => array(
+              'type' => 'file',
+              'weight' => 14,
+              'group' => $js_css_group,
+            ),
+            'js/leaflet.console.js' => array(
+              'type' => 'file',
+              'weight' => 16,
+              'group' => $js_css_group,
+            ),
+            'js/leaflet.debug.js' => array(
+              'type' => 'file',
+              'weight' => 18,
+              'group' => $js_css_group,
+            ),
+          ),
+          'css' => array(
+            'css/leaflet.css' => array(
+              'type' => 'file',
+              'weight' => 4,
+              'group' => $js_css_group,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  $libraries['leaflet'] = array(
+    'name' => 'Leaflet',
+    'vendor url' => 'http://leafletjs.com/',
+    'download url' => 'http://cdn.leafletjs.com/downloads/leaflet-1.0.0-b1.zip',
+    'version callback' => array('\Drupal\leaflet\Leaflet', 'getLibraryVersion'),
+    'version arguments' => array(),
+    'library path' => $module_path,
+    // This is taken in account if the module libraries_cdn is enabled.
+    'cdn' => array(
+      'aliases' => array('leaflet'),
+      'options' => array(
+        'weight' => 0,
+        'group' => $js_css_group,
+      ),
+      'request' => array(
+        // Maximum 10 seconds for the http requests to CDNs.
+        'timeout' => 10,
+      ),
+    ),
+    'variants' => array(),
+    'dependencies' => array(
+      'leaflet_integration',
+    ),
+  );
+
+
+  if ($version = \Drupal\leaflet\Leaflet::getLocalLibraryVersion()) {
+    unset($libraries['leaflet']['library path']);
+    $libraries['leaflet']['variants']['local:' . $version] = array(
+      'name' => 'Leaflet ' . $version,
+      'files' => array(
+        'js' => array(
+          'leaflet.js' => array(
+            'type' => 'file',
+            'weight' => 6,
+            'group' => $js_css_group,
+          ),
+        ),
+        'css' => array(
+          'leaflet.css' => array(
+            'type' => 'file',
+            'weight' => 4,
+            'group' => $js_css_group,
+          ),
+        ),
+      ),
+    );
+  }
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function leaflet_hook_info() {
+  $hooks = array(
+    'leaflet_object_preprocess_alter',
+    'leaflet_object_postprocess_alter',
+  );
+
+  return array_fill_keys($hooks, array('group' => 'leaflet'));
 }

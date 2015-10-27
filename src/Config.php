@@ -11,13 +11,24 @@ namespace Drupal\leaflet;
  */
 class Config {
 
+  /**
+   * Get default configuration.
+   *
+   * @param string $key
+   *   Key to get. If not provided, returns the full array.
+   *
+   * @return array|null
+   *   Returns the array or if a key is provided, it's value.
+   */
   static protected function defaults($key = NULL) {
     $defaults = array(
       'leaflet.js_css.group' => 'leaflet',
       'leaflet.js_css.weight' => 20,
+      'leaflet.js_css.media' => 'screen',
       'leaflet.edit_view_map' => 'leaflet_map_view_edit_form',
       'leaflet.default_ui_map' => 'leaflet_map_ui_default',
-      'leaflet.debug' => TRUE
+      'leaflet.variant' => 'local:3.9.0',
+      'leaflet.debug' => 0,
     );
     if ($key == NULL) {
       return $defaults;
@@ -26,6 +37,17 @@ class Config {
     return isset($defaults[$key]) ? $defaults[$key] : NULL;
   }
 
+  /**
+   * Fetches a configuration value.
+   *
+   * @param string|array $parents
+   *   The path to the configuration value. Strings use dots as path separator.
+   * @param string|array $default_value
+   *   The default value to use if the config value isn't set.
+   *
+   * @return mixed
+   *   The configuration value.
+   */
   static public function get($parents, $default_value = NULL) {
     $options = \Drupal::service('variable')->get('leaflet_config');
 
@@ -60,6 +82,17 @@ class Config {
     return $default_value;
   }
 
+  /**
+   * Sets a configuration value.
+   *
+   * @param string|array $parents
+   *   The path to the configuration value. Strings use dots as path separator.
+   * @param mixed $value
+   *   The  value to set.
+   *
+   * @return array
+   *   The configuration array.
+   */
   static public function set($parents, $value) {
     $config = \Drupal::service('variable')->get('leaflet_config', array());
 
@@ -80,6 +113,15 @@ class Config {
     return $config;
   }
 
+  /**
+   * Removes a configuration value.
+   *
+   * @param string|array $parents
+   *   The path to the configuration value. Strings use dots as path separator.
+   *
+   * @return array
+   *   The configuration array.
+   */
   static public function clear($parents) {
     $config = \Drupal::service('variable')->get('leaflet_config', array());
     $ref = &$config;

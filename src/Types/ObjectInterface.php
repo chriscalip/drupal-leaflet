@@ -28,7 +28,7 @@ interface ObjectInterface extends PluginInspectionInterface {
    * @TODO was does this?
    *
    * @param string|array $parents
-   *   @TODO Define how this has to look like if it is an array.
+   * @TODO Define how this has to look like if it is an array.
    */
   public function clearOption($parents);
 
@@ -36,6 +36,7 @@ interface ObjectInterface extends PluginInspectionInterface {
    * Return the options array.
    *
    * @return array
+   *   The array of options.
    */
   public function getOptions();
 
@@ -51,7 +52,7 @@ interface ObjectInterface extends PluginInspectionInterface {
    * Returns an option.
    *
    * @param string|array $parents
-   *   @TODO Define how this has to look like if it is an array.
+   * @TODO Define how this has to look like if it is an array.
    * @param mixed $default_value
    *   The default value to return if the option isn't set. Set to NULL if not
    *   defined.
@@ -65,7 +66,7 @@ interface ObjectInterface extends PluginInspectionInterface {
    * Set an option.
    *
    * @param string|array $parents
-   *   @TODO Define how this has to look like if it is an array.
+   * @TODO Define how this has to look like if it is an array.
    *
    * @param mixed $value
    *   The value to set.
@@ -271,4 +272,16 @@ interface ObjectInterface extends PluginInspectionInterface {
    * @return string
    */
   public function getPluginDescription();
+
+  /**
+   * Refresh string translations.
+   */
+  public function i18nStringsRefresh();
+
+  /**
+   * Return the Factory Service of the object.
+   *
+   * @return string
+   */
+  public function getFactoryService();
 }

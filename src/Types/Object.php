@@ -55,6 +55,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
   protected $options = array();
 
   /**
+   * Holds the Collection object.
+   *
    * @var Collection
    */
   protected $collection;
@@ -196,7 +198,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
   public function getOptions() {
     if (!empty($this->options)) {
       return $this->options;
-    } else {
+    }
+    else {
       $configuration = $this->getConfiguration();
       if (!empty($configuration['options'])) {
         return $configuration['options'];
@@ -244,7 +247,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
     $configuration = $this->getConfiguration();
     if (isset($configuration['machine_name'])) {
       return check_plain($configuration['machine_name']);
-    } else {
+    }
+    else {
       return 'undefined';
     }
   }
@@ -256,7 +260,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
     $configuration = $this->getConfiguration();
     if (isset($configuration['name'])) {
       return check_plain($configuration['name']);
-    } else {
+    }
+    else {
       return 'undefined';
     }
   }
@@ -268,7 +273,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
     $configuration = $this->getConfiguration();
     if (isset($configuration['description'])) {
       return check_plain($configuration['description']);
-    } else {
+    }
+    else {
       return 'undefined';
     }
   }
@@ -280,7 +286,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
     $configuration = $this->getConfiguration();
     if (isset($configuration['factory_service'])) {
       return check_plain($configuration['factory_service']);
-    } else {
+    }
+    else {
       return 'undefined';
     }
   }
@@ -300,7 +307,8 @@ abstract class Object extends PluginBase implements ObjectInterface {
         $notfound = TRUE;
         $parents = array();
         $options = array();
-      } else {
+      }
+      else {
         $options = $this->options;
       }
 
@@ -351,6 +359,7 @@ abstract class Object extends PluginBase implements ObjectInterface {
             'type' => 'file',
             'group' => Config::get('leaflet.js_css.group'),
             'weight' => Config::get('leaflet.js_css.weight'),
+            'media' => Config::get('leaflet.js_css.media'),
           );
         }
       }
@@ -444,6 +453,9 @@ abstract class Object extends PluginBase implements ObjectInterface {
 
   /**
    * {@inheritdoc}
+   *
+   * !Attention! This function will remove any option that is named after a
+   * plugin type e.g.: layers, controls, styles, interactions, components .
    */
   public function getJS() {
     $export = $this->getExport();
@@ -490,4 +502,5 @@ abstract class Object extends PluginBase implements ObjectInterface {
    * {@inheritdoc}
    */
   public function i18nStringsRefresh() {}
+
 }

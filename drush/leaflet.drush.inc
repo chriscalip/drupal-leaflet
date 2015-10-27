@@ -70,8 +70,9 @@ function drush_leaflet_plugin() {
     }
 
     // Decompress the archive.
+    drush_tarball_extract($filename);
+    drush_move_dir($dirname, 'leaflet', TRUE);
     $dirname = 'leaflet';
-    drush_tarball_extract($filename, $dirname);
   }
 
   if (is_dir($dirname)) {
