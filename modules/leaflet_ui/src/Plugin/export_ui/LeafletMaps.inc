@@ -86,6 +86,30 @@ function leaflet_map_form_start($form, &$form_state) {
   $class = new Drupal\leaflet_ui\UI\LeafletMaps();
   $class->init($form_state['plugin']);
   $class->edit_form($form, $form_state);
+  ctools_include('plugins');
+  $item = $form_state['item'];
+  // currently unable to get factory service from ctool plugin object
+  // factory service is hardcoded in .js
+  $mapped_map_type = array(
+    'Map' => 'leaflet.map.internal.Map',
+    'Mapbox' => 'leaflet.map.internal.mapbox',
+  );
+  $available_map_types = array();
+  $map_types = ctools_get_plugins('leaflet', 'Map');
+  foreach ($map_types as $map_type => $map_type_info) {
+    $factory_service = $mapped_map_type[$map_type];
+    $available_map_types[$factory_service] = $map_type;
+  }
+  $map_type = 'leaflet.map.internal.Map';
+  if ( !empty($form_state['item']->factory_service) ) {
+    $map_type = $form_state['item']->factory_service;
+  }
+  $form['info']['factory_service'] = array(
+    '#type' => 'select',
+    '#title' => t('Map Type'),
+    '#options' => $available_map_types,
+    '#default_value' => $map_type,
+  );
   return $form;
 }
 
